@@ -3,6 +3,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 import os
 from api import auth, dashboard, admin
+from database.database import engine, Base
+from database import models
+
+# Crear las tablas en la base de datos automáticamente si no existen
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Távika API")
 
