@@ -22,7 +22,9 @@ class Colegio(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String, index=True)
+    provincia = Column(String, index=True)
     distrito = Column(String, index=True)
+    sector = Column(String, index=True) # Privado, Estatal, etc
     nivel = Column(String, index=True) # Jardin, Primaria, Secundaria, etc
     email = Column(String, nullable=True)
     origen = Column(String) # Origen del dato (abc, web, etc)
