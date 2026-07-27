@@ -5,6 +5,17 @@ from database.models import Colegio
 
 router = APIRouter()
 
+@router.get("/stats")
+def get_stats(db: Session = Depends(get_db)):
+    total = db.query(Colegio).count()
+    sanos = db.query(Colegio).filter(Colegio.estado == "sano").count()
+    rotos = db.query(Colegio).filter(Colegio.estado == "roto").count()
+    return {
+        "total": total,
+        "sanos": sanos,
+        "rotos": rotos
+    }
+
 @router.get("/colegios")
 def list_colegios(skip: int = 0, limit: int = 100, estado: str = None, db: Session = Depends(get_db)):
     """ Endpoint para ver el estado de la base de datos de colegios """

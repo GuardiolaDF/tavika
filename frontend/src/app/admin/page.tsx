@@ -1,4 +1,40 @@
+"use client";
+import { useEffect, useState } from "react";
+
 export default function AdminPanel() {
+  const [stats, setStats] = useState({ total: 0, sanos: 0, rotos: 0 });
+  const [colegios, setColegios] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchStats = async () => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const res = await fetch(`${apiUrl}/admin/stats`);
+      const data = await res.json();
+      setStats(data);
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+    }
+  };
+
+  const fetchColegios = async () => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const res = await fetch(`${apiUrl}/admin/colegios?limit=10`);
+      const data = await res.json();
+      setColegios(data.colegios || []);
+    } catch (error) {
+      console.error("Error fetching colegios:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStats();
+    fetchColegios();
+  }, []);
+
   return (
     <div className="bg-surface text-slate-800 min-h-screen p-8">
       <div className="max-w-7xl mx-auto">
@@ -20,15 +56,15 @@ export default function AdminPanel() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-paper p-6 rounded-2xl border border-line">
             <h3 className="text-slate-500 text-sm font-semibold uppercase mb-2">Colegios Totales</h3>
-            <p className="text-4xl font-bold text-ink">3,450</p>
+            <p className="text-4xl font-bold text-ink">{loading ? "..." : stats.total.toLocaleString()}</p>
           </div>
           <div className="bg-paper p-6 rounded-2xl border border-emerald/30">
             <h3 className="text-emerald text-sm font-semibold uppercase mb-2">Sanos (Verificados)</h3>
-            <p className="text-4xl font-bold text-emerald">3,300</p>
+            <p className="text-4xl font-bold text-emerald">{loading ? "..." : stats.sanos.toLocaleString()}</p>
           </div>
           <div className="bg-paper p-6 rounded-2xl border border-red-500/30">
             <h3 className="text-red-500 text-sm font-semibold uppercase mb-2">Rotos (Rebotados)</h3>
-            <p className="text-4xl font-bold text-red-500">150</p>
+            <p className="text-4xl font-bold text-red-500">{loading ? "..." : stats.rotos.toLocaleString()}</p>
           </div>
         </div>
 
@@ -45,24 +81,30 @@ export default function AdminPanel() {
             <thead>
               <tr className="text-slate-400 bg-paper border-b border-line">
                 <th className="p-4 font-medium">Nombre</th>
-                <th className="p-4 font-medium">Distrito</th>
+                <th className="p-4 font-medium">Provincia</th>
                 <th className="p-4 font-medium">Email</th>
                 <th className="p-4 font-medium">Estado</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
-              <tr className="hover:bg-slate-50">
-                <td className="p-4 font-medium text-ink">EES N° 4</td>
-                <td className="p-4 text-slate-500">Quilmes</td>
-                <td className="p-4 text-slate-500">ees4quilmes@abc.gob.ar</td>
-                <td className="p-4"><span className="bg-emerald/10 text-emerald px-2 py-1 rounded-full text-xs font-semibold">Sano</span></td>
-              </tr>
-              <tr className="hover:bg-slate-50">
-                <td className="p-4 font-medium text-ink">EEST N° 1</td>
-                <td className="p-4 text-slate-500">Avellaneda</td>
-                <td className="p-4 text-slate-500">tecnica1av@gmail.com</td>
-                <td className="p-4"><span className="bg-red-500/10 text-red-500 px-2 py-1 rounded-full text-xs font-semibold">Roto</span></td>
-              </tr>
+              {loading ? (
+                <tr><td colSpan={4} className="p-4 text-center text-slate-500">Cargando datos...</td></tr>
+              ) : (
+                colegios.map((col: any) => (
+                  <tr key={col.id} className="hover:bg-slate-50">
+                    <td className="p-4 font-medium text-ink">{col.nombre}</td>
+                    <td className="p-4 text-slate-500">{col.provincia} - {col.distrito}</td>
+                    <td className="p-4 text-slate-500">{col.email || "Sin email"}</td>
+                    <td className="p-4">
+                      {col.estado === "sano" ? (
+                        <span className="bg-emerald/10 text-emerald px-2 py-1 rounded-full text-xs font-semibold">Sano</span>
+                      ) : (
+                        <span className="bg-red-500/10 text-red-500 px-2 py-1 rounded-full text-xs font-semibold">Roto</span>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

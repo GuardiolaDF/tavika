@@ -60,7 +60,19 @@ export default function Dashboard() {
         <div className="text-center py-12 text-slate-400">
           <i className="fa-solid fa-inbox text-4xl mb-4 opacity-50"></i>
           <p>Aún no realizaste ninguna postulación.</p>
-          <button className="mt-4 bg-emerald text-white px-6 py-2 rounded-xl font-medium hover:bg-emeralddeep transition-colors">
+          
+          <div className="max-w-md mx-auto mt-8 bg-slate-50 p-4 rounded-xl border border-line text-left">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input type="checkbox" className="mt-1 w-4 h-4 text-emerald rounded border-slate-300 focus:ring-emerald" />
+              <span className="text-xs text-slate-600">
+                Declaro bajo juramento que los documentos adjuntos a mi campaña contienen 
+                exclusivamente mis propios datos profesionales, no suplantan la identidad de terceros 
+                y acepto los <a href="/terminos" className="text-navy hover:underline">Términos y Condiciones</a>.
+              </span>
+            </label>
+          </div>
+
+          <button className="mt-6 bg-emerald text-white px-6 py-2 rounded-xl font-medium hover:bg-emeralddeep transition-colors">
             Crear Nueva Campaña
           </button>
         </div>

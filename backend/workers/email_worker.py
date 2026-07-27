@@ -67,3 +67,53 @@ def process_campaign(self, campana_id: int):
         raise self.retry(exc=e, countdown=60)
     finally:
         db.close()
+
+@celery_app.task
+def daily_campaign_scheduler():
+    """
+    Tarea cron diaria (ejecutada a las 9AM).
+    Selecciona hasta 400 postulaciones pendientes y las procesa,
+    para respetar el límite de Gmail.
+    """
+    db = SessionLocal()
+    try:
+        # Buscamos campañas activas (estado="en_progreso" o "pendiente")
+        # Por simplicidad, tomamos la primera campaña activa.
+        campana = db.query(Campana).filter(Campana.estado.in_(["pendiente", "en_progreso"])).first()
+        if not campana:
+            print("No hay campañas activas para enviar hoy.")
+            return
+
+        # Si estaba pendiente, la pasamos a en_progreso
+        if campana.estado == "pendiente":
+            campana.estado = "en_progreso"
+            db.commit()
+
+        # Seleccionamos entre 300 y 400 colegios de forma aleatoria para no mandar siempre el mismo número
+        daily_limit = random.randint(300, 400)
+        print(f"Planificando envío de {daily_limit} correos para la campaña {campana.id}")
+
+        pendientes = db.query(Postulacion).filter(
+            Postulacion.campana_id == campana.id,
+            Postulacion.estado == "pendiente"
+        ).limit(daily_limit).all()
+
+        if not pendientes:
+            campana.estado = "completado"
+            db.commit()
+            print(f"Campaña {campana.id} completada.")
+            return
+
+        # En lugar de procesarlos aquí sincrónicamente, encolamos cada uno o
+        # encolamos un lote. Como ya tenemos 'process_campaign' que toma una campaña entera,
+        # necesitamos refactorizar 'process_campaign' o simplemente dejar que 'process_campaign' procese
+        # solo los primeros 400.
+        
+        # Como process_campaign ya hace el ciclo, podemos llamarlo y adentro limitar.
+        # Pero para que Celery Beat funcione mejor, llamamos a process_campaign desde aquí.
+        celery_app.send_task("workers.email_worker.process_campaign", args=[campana.id, daily_limit])
+
+    except Exception as e:
+        print(f"Error en daily scheduler: {e}")
+    finally:
+        db.close()

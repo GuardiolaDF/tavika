@@ -1,5 +1,6 @@
 import os
 from celery import Celery
+from celery.schedules import crontab
 
 # Redis is required as the message broker for Celery.
 # Locally we will use a local redis instance, in production Railway will provide a REDIS_URL
@@ -18,6 +19,12 @@ celery_app.conf.update(
     result_serializer="json",
     timezone="America/Argentina/Buenos_Aires",
     enable_utc=True,
-    # Celery limits to prevent spam behavior accidentally triggering too fast
     task_default_rate_limit="50/m",
+    beat_schedule={
+        "daily_campaign_sender": {
+            "task": "workers.email_worker.daily_campaign_scheduler",
+            # Ejecutar todos los días a las 09:00 AM hora de Argentina
+            "schedule": crontab(hour=9, minute=0),
+        },
+    }
 )
