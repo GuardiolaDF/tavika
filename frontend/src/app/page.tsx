@@ -23,9 +23,9 @@ export default function Home() {
             </nav>
           </div>
           <div className="flex items-center space-x-4">
-            <Link href="/dashboard" className="hidden sm:inline-block text-sm font-medium text-white/70 hover:text-white px-3 py-2 transition-colors">
+            <a href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/auth/login`} className="hidden sm:inline-block text-sm font-medium text-white/70 hover:text-white px-3 py-2 transition-colors">
               Iniciar Sesión
-            </Link>
+            </a>
             <Link href="#pricing" className="bg-emerald hover:bg-emeralddeep text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-all duration-300 shadow-md shadow-emerald/20">
               Probar Gratis
             </Link>
