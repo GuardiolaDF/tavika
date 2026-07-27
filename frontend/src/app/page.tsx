@@ -230,8 +230,13 @@ export default function Home() {
             </div>
           </div>
           <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-slate-500">
-            <p>© 2025 Távika. Todos los derechos reservados.</p>
-            <p>Hecho con <i className="fa-solid fa-heart text-emerald mx-1"></i> para docentes argentinos.</p>
+            <p>© 2026 Távika. Todos los derechos reservados.</p>
+            <div className="flex gap-4 mt-4 md:mt-0">
+              <a href="/privacidad" className="hover:text-white transition-colors">Privacidad</a>
+              <a href="/terminos" className="hover:text-white transition-colors">Términos y Condiciones</a>
+              <a href="/imprint" className="hover:text-white transition-colors">Aviso Legal</a>
+            </div>
+            <p className="mt-4 md:mt-0">Hecho con <i className="fa-solid fa-heart text-emerald mx-1"></i> para docentes argentinos.</p>
           </div>
         </div>
       </footer>
