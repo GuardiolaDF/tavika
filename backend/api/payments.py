@@ -34,7 +34,8 @@ async def create_preference():
         print("MP Response:", preference_response) # Para ver qué responde MercadoPago en los logs
         
         if preference_response["status"] not in (200, 201):
-            return {"error": "Error de MercadoPago", "details": preference_response}
+            mp_error = str(preference_response.get("response", "Error desconocido de MP"))
+            return {"error": mp_error, "details": preference_response}
             
         preference = preference_response["response"]
         return {"init_point": preference["init_point"], "id": preference["id"]}

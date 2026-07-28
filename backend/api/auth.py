@@ -55,4 +55,11 @@ async def auth_callback(request: Request):
         return {"message": "Login successful", "email": user_info['email'], "token": token.get('access_token')}
         
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        debug_info = {
+            "error": str(e),
+            "session_keys": list(request.session.keys()) if hasattr(request, "session") else "no_session",
+            "url_scheme": request.url.scheme,
+            "url": str(request.url),
+            "headers": dict(request.headers)
+        }
+        raise HTTPException(status_code=400, detail=debug_info)
