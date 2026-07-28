@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
-export default function Home() {
+"use client";
+import { useState } from "react";
   return (
     <>
       {/* Header */}
@@ -211,7 +212,22 @@ export default function Home() {
                   <li className="flex items-center"><i className="fa-solid fa-check text-emerald mr-3"></i>Todos los filtros avanzados</li>
                   <li className="flex items-center"><i className="fa-solid fa-check text-emerald mr-3"></i>Soporte prioritario</li>
                 </ul>
-                <button className="block w-full py-4 bg-emerald text-white font-semibold rounded-xl text-center hover:bg-emeralddeep transition-all">
+                <button 
+                  onClick={async () => {
+                    try {
+                      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                      const res = await fetch(`${apiUrl}/api/payments/create_preference`, { method: 'POST' });
+                      const data = await res.json();
+                      if (data.init_point) {
+                        window.location.href = data.init_point;
+                      }
+                    } catch (error) {
+                      console.error("Error creating payment:", error);
+                      alert("Error al conectar con MercadoPago");
+                    }
+                  }}
+                  className="block w-full py-4 bg-emerald text-white font-semibold rounded-xl text-center hover:bg-emeralddeep transition-all"
+                >
                   Comprar Pase
                 </button>
               </div>

@@ -21,10 +21,25 @@ export default function DashboardLayout({
             <i className="fa-solid fa-paper-plane w-5 text-center"></i> Mis Postulaciones
             <span className="ml-auto bg-emerald text-white text-xs font-bold px-2 py-0.5 rounded-full">3</span>
           </a>
-          <div className="pt-4 border-t border-white/10 mt-4">
-            <a href="#pricing" className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm bg-emerald/15 text-emerald font-semibold hover:bg-emerald/25 transition-colors">
+          <div className="mt-auto px-4 pb-6">
+            <button 
+              onClick={async () => {
+                try {
+                  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                  const res = await fetch(`${apiUrl}/api/payments/create_preference`, { method: 'POST' });
+                  const data = await res.json();
+                  if (data.init_point) {
+                    window.location.href = data.init_point;
+                  }
+                } catch (error) {
+                  console.error("Error creating payment:", error);
+                  alert("Error al conectar con MercadoPago");
+                }
+              }}
+              className="w-full bg-emerald text-white rounded-xl py-3 font-semibold hover:bg-emeralddeep transition-colors"
+            >
               <i className="fa-solid fa-bolt w-5 text-center"></i> Comprar Pase
-            </a>
+            </button>
           </div>
         </nav>
       </aside>
