@@ -55,7 +55,7 @@ async def auth_callback(request: Request):
         # user.gmail_token = token.get('refresh_token')
         
         # Redirigir al frontend al dashboard
-        frontend_url = os.getenv("FRONTEND_URL", "https://tavika.up.railway.app")
+        frontend_url = os.getenv("FRONTEND_URL", "https://tavika.up.railway.app").rstrip("/")
         return RedirectResponse(url=f"{frontend_url}/dashboard?login=success")
         
     except Exception as e:
