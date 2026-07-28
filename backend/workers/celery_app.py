@@ -1,4 +1,5 @@
 import os
+os.environ.setdefault('C_FORCE_ROOT', 'true')
 from celery import Celery
 from celery.schedules import crontab
 
@@ -19,6 +20,7 @@ celery_app.conf.update(
     result_serializer="json",
     timezone="America/Argentina/Buenos_Aires",
     enable_utc=True,
+    worker_concurrency=2, # VERY IMPORTANT: Prevents Railway OOM by limiting workers instead of spawning 48
     task_default_rate_limit="50/m",
     beat_schedule={
         "daily_campaign_sender": {
