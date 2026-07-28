@@ -1,3 +1,5 @@
+"use client";
+
 export default function DashboardLayout({
   children,
 }: {
@@ -25,7 +27,8 @@ export default function DashboardLayout({
             <button 
               onClick={async () => {
                 try {
-                  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                  const rawUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                  const apiUrl = rawUrl.endsWith('/') ? rawUrl.slice(0, -1) : rawUrl;
                   const res = await fetch(`${apiUrl}/api/payments/create_preference`, { method: 'POST' });
                   const data = await res.json();
                   if (data.init_point) {
