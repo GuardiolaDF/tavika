@@ -17,7 +17,7 @@ async def create_preference():
             {
                 "title": "Suscripción Távika Pro - 1 Mes",
                 "quantity": 1,
-                "unit_price": 15000, # Precio de ejemplo (AR$ 15.000)
+                "unit_price": 4999, # Precio actualizado para coincidir con la web
                 "currency_id": "ARS"
             }
         ]
