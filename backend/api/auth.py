@@ -31,6 +31,9 @@ oauth.register(
 
 @router.get("/login")
 async def login(request: Request):
+    # Limpiamos sesiones viejas para que la cookie no explote por el límite de 4KB de los navegadores
+    request.session.clear()
+    
     # Genera la URL a la que Google redirigirá después de aceptar los permisos
     redirect_uri = request.url_for('auth_callback')
     # Pedimos access_type=offline para que nos de un refresh_token, así Celery puede enviar correos de fondo

@@ -20,13 +20,7 @@ async def create_preference():
                 "unit_price": 15000, # Precio de ejemplo (AR$ 15.000)
                 "currency_id": "ARS"
             }
-        ],
-        "back_urls": {
-            "success": "http://localhost:3002/dashboard?payment=success",
-            "failure": "http://localhost:3002/dashboard?payment=failure",
-            "pending": "http://localhost:3002/dashboard?payment=pending"
-        },
-        "auto_return": "approved",
+        ]
     }
     
     try:
