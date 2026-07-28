@@ -12,9 +12,6 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Távika API")
 
-# Fundamental para que FastAPI sepa que está detrás de HTTPS en Railway
-app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=["*"])
-
 # OAuth requiere session middleware
 app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY", "super-secret-key"))
 
@@ -26,6 +23,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Fundamental para que FastAPI sepa que está detrás de HTTPS en Railway
+# (Debe ser el ÚLTIMO add_middleware para que se ejecute PRIMERO y modifique los headers para todos)
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=["*"])
 
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(dashboard.router, prefix="/api/dashboard", tags=["dashboard"])
