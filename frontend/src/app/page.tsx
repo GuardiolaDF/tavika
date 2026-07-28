@@ -220,10 +220,13 @@ import { useState } from "react";
                       const data = await res.json();
                       if (data.init_point) {
                         window.location.href = data.init_point;
+                      } else {
+                        console.error("MP Error:", data);
+                        alert("Error de MercadoPago: " + (data.error || "Revisa la consola"));
                       }
                     } catch (error) {
                       console.error("Error creating payment:", error);
-                      alert("Error al conectar con MercadoPago");
+                      alert("Error de red al conectar con el backend");
                     }
                   }}
                   className="block w-full py-4 bg-emerald text-white font-semibold rounded-xl text-center hover:bg-emeralddeep transition-all"

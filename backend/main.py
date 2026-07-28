@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 import os
 from api import auth, dashboard, admin, payments
 from database.database import engine, Base
@@ -10,6 +11,9 @@ from database import models
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Távika API")
+
+# Fundamental para que FastAPI sepa que está detrás de HTTPS en Railway
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=["*"])
 
 # OAuth requiere session middleware
 app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY", "super-secret-key"))

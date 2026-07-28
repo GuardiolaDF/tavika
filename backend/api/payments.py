@@ -29,10 +29,18 @@ async def create_preference():
         "auto_return": "approved",
     }
     
-    preference_response = sdk.preference().create(preference_data)
-    preference = preference_response["response"]
-    
-    return {"init_point": preference["init_point"], "id": preference["id"]}
+    try:
+        preference_response = sdk.preference().create(preference_data)
+        print("MP Response:", preference_response) # Para ver qué responde MercadoPago en los logs
+        
+        if preference_response["status"] not in (200, 201):
+            return {"error": "Error de MercadoPago", "details": preference_response}
+            
+        preference = preference_response["response"]
+        return {"init_point": preference["init_point"], "id": preference["id"]}
+    except Exception as e:
+        print("Exception MP:", str(e))
+        return {"error": str(e)}
 
 @router.post("/webhook")
 async def mp_webhook(request: Request):

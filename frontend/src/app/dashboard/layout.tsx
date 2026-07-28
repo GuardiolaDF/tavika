@@ -30,10 +30,13 @@ export default function DashboardLayout({
                   const data = await res.json();
                   if (data.init_point) {
                     window.location.href = data.init_point;
+                  } else {
+                    console.error("MP Error:", data);
+                    alert("Error de MercadoPago: " + (data.error || "Revisa la consola"));
                   }
                 } catch (error) {
                   console.error("Error creating payment:", error);
-                  alert("Error al conectar con MercadoPago");
+                  alert("Error de red al conectar con el backend");
                 }
               }}
               className="w-full bg-emerald text-white rounded-xl py-3 font-semibold hover:bg-emeralddeep transition-colors"
