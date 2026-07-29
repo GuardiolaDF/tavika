@@ -28,6 +28,19 @@ export default function AdminPanel() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
   useEffect(() => {
+    // Capturar de la URL si venimos del login
+    const params = new URLSearchParams(window.location.search);
+    const urlToken = params.get("token");
+    const urlEmail = params.get("email");
+    const urlPicture = params.get("picture");
+    
+    if (urlToken && urlEmail) {
+      localStorage.setItem("token", urlToken);
+      localStorage.setItem("email", urlEmail);
+      if (urlPicture) localStorage.setItem("picture", decodeURIComponent(urlPicture));
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
     // Basic Auth Check
     const localToken = localStorage.getItem("token");
     const localEmail = localStorage.getItem("email");

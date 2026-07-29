@@ -7,21 +7,31 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [email, setEmail] = useState<string | null>(null);
+  const [picture, setPicture] = useState<string | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
     const userEmail = params.get("email");
+    const userPicture = params.get("picture");
     
     if (token && userEmail) {
       localStorage.setItem("token", token);
       localStorage.setItem("email", userEmail);
+      if (userPicture) localStorage.setItem("picture", decodeURIComponent(userPicture));
       // Limpiar la URL para que no quede el token expuesto
       window.history.replaceState({}, document.title, window.location.pathname);
     }
     
     setEmail(localStorage.getItem("email"));
+    setPicture(localStorage.getItem("picture"));
   }, []);
+
+  const handleLogout = () => {
+    localStorage.clear();
+    window.location.href = "/";
+  };
 
   return (
     <div className="bg-surface text-slate-800 flex min-h-screen">
@@ -78,15 +88,50 @@ export default function DashboardLayout({
           </div>
           <div className="flex items-center gap-4">
             {email ? (
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 relative">
                 {email === "tavika.app@gmail.com" && (
                   <a href="/admin" className="bg-purple-100 text-purple-700 hover:bg-purple-200 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors">
                     <i className="fa-solid fa-lock"></i> Panel Admin
                   </a>
                 )}
-                <div className="flex items-center gap-2 bg-slate-100 border border-line text-slate-700 rounded-xl px-4 py-2 text-sm font-medium">
-                  <i className="fa-brands fa-google text-slate-400"></i>
-                  <span>{email}</span>
+                
+                {/* User Dropdown */}
+                <div className="relative">
+                  <button 
+                    onClick={() => setMenuOpen(!menuOpen)}
+                    className="flex items-center gap-2 bg-white border border-line hover:bg-slate-50 rounded-xl p-1.5 pr-4 transition-all cursor-pointer"
+                  >
+                    {picture ? (
+                      <img src={picture} alt="Profile" className="w-8 h-8 rounded-lg object-cover" />
+                    ) : (
+                      <div className="w-8 h-8 rounded-lg bg-emerald/10 text-emerald flex items-center justify-center">
+                        <i className="fa-solid fa-user"></i>
+                      </div>
+                    )}
+                    <div className="flex flex-col items-start">
+                      <span className="text-sm font-bold text-ink leading-tight">{email.split("@")[0]}</span>
+                      <span className="text-xs text-slate-400 leading-tight">Ver Perfil <i className="fa-solid fa-chevron-down ml-1 text-[10px]"></i></span>
+                    </div>
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  {menuOpen && (
+                    <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-lg border border-line py-2 z-50 animate-fade-in">
+                      <div className="px-4 py-2 border-b border-line mb-2">
+                        <p className="text-sm font-bold text-ink truncate">{email}</p>
+                        <p className="text-xs text-slate-500">Plan Freemium</p>
+                      </div>
+                      <a href="#" className="block px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-emerald transition-colors">
+                        <i className="fa-solid fa-gear w-5 text-center mr-1"></i> Configuración
+                      </a>
+                      <button 
+                        onClick={handleLogout}
+                        className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors"
+                      >
+                        <i className="fa-solid fa-arrow-right-from-bracket w-5 text-center mr-1"></i> Cerrar Sesión
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (

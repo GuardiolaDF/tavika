@@ -4,6 +4,7 @@ from starlette.config import Config
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
 import os
+import urllib.parse
 
 router = APIRouter()
 
@@ -54,10 +55,16 @@ async def auth_callback(request: Request):
         #    user = Usuario(email=user_info.email, ...)
         # user.gmail_token = token.get('refresh_token')
         
-        # Redirigir al frontend al dashboard
+        # Extraer imagen y encodearla
+        picture_url = urllib.parse.quote(user_info.get('picture', ''))
+        
+        # Redirigir al frontend
         frontend_url = os.getenv("FRONTEND_URL", "https://tavika.up.railway.app").rstrip("/")
-        # Enviamos el token y el email en la URL para que el frontend los guarde en localStorage
-        return RedirectResponse(url=f"{frontend_url}/dashboard?login=success&token={token.get('access_token')}&email={user_info['email']}")
+        
+        if user_info['email'] == "tavika.app@gmail.com":
+            return RedirectResponse(url=f"{frontend_url}/admin?login=success&token={token.get('access_token')}&email={user_info['email']}&picture={picture_url}")
+        else:
+            return RedirectResponse(url=f"{frontend_url}/dashboard?login=success&token={token.get('access_token')}&email={user_info['email']}&picture={picture_url}")
         
     except Exception as e:
         debug_info = {
