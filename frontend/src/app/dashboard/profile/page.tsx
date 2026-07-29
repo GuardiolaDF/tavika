@@ -2,9 +2,17 @@
 import { useEffect, useState } from "react";
 
 export default function ProfilePage() {
-  const [perfil, setPerfil] = useState({ area_estudios: "", dni: "", telefono: "", cv_filename: "" });
+  const [perfil, setPerfil] = useState({
+    nombre: "",
+    area_estudios: "",
+    telefono: "",
+    asunto: "",
+    cuerpo: "",
+    cv_filename: ""
+  });
   const [cvFile, setCvFile] = useState<File | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [terminos, setTerminos] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [fetching, setFetching] = useState(true);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -18,9 +26,11 @@ export default function ProfilePage() {
         })
         .then(data => {
           setPerfil({
+            nombre: data.nombre || "",
             area_estudios: data.area_estudios || "",
-            dni: data.dni || "",
             telefono: data.telefono || "",
+            asunto: data.asunto_template || "",
+            cuerpo: data.cuerpo_template || "",
             cv_filename: data.cv_filename || ""
           });
           setFetching(false);
@@ -29,15 +39,29 @@ export default function ProfilePage() {
     }
   }, []);
 
-  const handleSaveProfile = async (e: React.FormEvent) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      if (file.size > 2 * 1024 * 1024) {
+        alert("El archivo no puede pesar más de 2MB.");
+        e.target.value = '';
+        return;
+      }
+      setCvFile(file);
+    }
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setSaving(true);
     try {
       const formData = new FormData();
       formData.append("email", localStorage.getItem("email") || "");
+      formData.append("nombre", perfil.nombre);
       formData.append("area_estudios", perfil.area_estudios);
-      formData.append("dni", perfil.dni);
       formData.append("telefono", perfil.telefono);
+      formData.append("asunto_template", perfil.asunto);
+      formData.append("cuerpo_template", perfil.cuerpo);
       if (cvFile) formData.append("cv", cvFile);
       
       const res = await fetch(`${apiUrl}/api/campaigns/profile`, {
@@ -48,7 +72,7 @@ export default function ProfilePage() {
       if (res.ok) {
         alert("Perfil guardado con éxito.");
         if (cvFile) {
-          setPerfil({...perfil, cv_filename: "Actualizado recientemente"});
+          setPerfil(prev => ({...prev, cv_filename: cvFile.name}));
           setCvFile(null);
         }
       } else {
@@ -58,7 +82,7 @@ export default function ProfilePage() {
     } catch (e) {
       alert("Error de red");
     }
-    setLoading(false);
+    setSaving(false);
   };
 
   if (fetching) return <div className="p-10 text-center"><i className="fa-solid fa-spinner fa-spin mr-2"></i>Cargando perfil...</div>;
@@ -71,43 +95,133 @@ export default function ProfilePage() {
       </div>
 
       <div className="bg-paper rounded-2xl border border-line p-8 shadow-sm">
-        <form onSubmit={handleSaveProfile} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-semibold text-ink mb-2">Área de Estudios / Materia</label>
-              <input required type="text" value={perfil.area_estudios} onChange={e => setPerfil({...perfil, area_estudios: e.target.value})} className="w-full border border-line rounded-xl px-4 py-3 outline-none focus:border-emerald" placeholder="Ej: Matemáticas" />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-ink mb-2">DNI / Pasaporte</label>
-              <input type="text" value={perfil.dni} onChange={e => setPerfil({...perfil, dni: e.target.value})} className="w-full border border-line rounded-xl px-4 py-3 outline-none focus:border-emerald" placeholder="Ej: 12.345.678" />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-ink mb-2">Teléfono de Contacto</label>
-              <input type="text" value={perfil.telefono} onChange={e => setPerfil({...perfil, telefono: e.target.value})} className="w-full border border-line rounded-xl px-4 py-3 outline-none focus:border-emerald" placeholder="Ej: 11 1234-5678" />
+        <form onSubmit={handleSave} className="space-y-8">
+          
+          {/* BLOQUE 1: Datos Personales */}
+          <div className="bg-white rounded-xl p-6 border border-line shadow-sm">
+            <h2 className="text-xl font-bold text-ink mb-4 border-b border-line pb-2">
+              <i className="fa-solid fa-user text-emerald mr-2"></i> Bloque 1: Datos Personales
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Nombre de Pila</label>
+                <input 
+                  type="text"
+                  value={perfil.nombre}
+                  onChange={e => setPerfil({...perfil, nombre: e.target.value})}
+                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-emerald outline-none transition-colors"
+                  placeholder="Ej: María"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Materia o Área</label>
+                <input 
+                  type="text"
+                  value={perfil.area_estudios}
+                  onChange={e => {
+                    const val = e.target.value;
+                    setPerfil({...perfil, area_estudios: val, asunto: `Postulacion espontanea para el area ${val}`});
+                  }}
+                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-emerald outline-none transition-colors"
+                  placeholder="Ej: Matemáticas"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Teléfono de Contacto</label>
+                <input 
+                  type="text"
+                  value={perfil.telefono}
+                  onChange={e => setPerfil({...perfil, telefono: e.target.value})}
+                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-emerald outline-none transition-colors"
+                  placeholder="Ej: 11 1234-5678"
+                  required
+                />
+              </div>
             </div>
           </div>
-          
-          <div className="pt-4 border-t border-line">
-            <label className="block text-sm font-semibold text-ink mb-2">Currículum (PDF)</label>
-            <div className="border-2 border-dashed border-line rounded-xl p-8 text-center hover:bg-slate-50 transition-colors">
-              <i className="fa-solid fa-file-pdf text-4xl text-slate-300 mb-4"></i>
-              {perfil.cv_filename ? (
-                <p className="text-emerald text-sm font-semibold mb-4"><i className="fa-solid fa-check mr-2"></i>CV Guardado: {perfil.cv_filename.split("/").pop()}</p>
-              ) : (
-                <p className="text-amber-500 text-sm font-semibold mb-4"><i className="fa-solid fa-triangle-exclamation mr-2"></i>Aún no has subido tu CV</p>
-              )}
+
+          {/* BLOQUE 2: eMail */}
+          <div className="bg-white rounded-xl p-6 border border-line shadow-sm">
+            <h2 className="text-xl font-bold text-ink mb-4 border-b border-line pb-2">
+              <i className="fa-solid fa-envelope text-blue-500 mr-2"></i> Bloque 2: Plantilla de Email
+            </h2>
+            <p className="text-sm text-slate-500 mb-4">
+              Estos textos se usarán por defecto al crear tus campañas. Puedes usar variables como <code className="bg-slate-100 text-slate-700 px-1 rounded">{`{{colegio_nombre}}`}</code>.
+            </p>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Asunto del correo</label>
+                <input 
+                  type="text"
+                  value={perfil.asunto}
+                  onChange={e => setPerfil({...perfil, asunto: e.target.value})}
+                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-emerald outline-none transition-colors"
+                  placeholder={`Postulacion espontanea para el area ${perfil.area_estudios || '...'}`}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Cuerpo del texto</label>
+                <textarea 
+                  value={perfil.cuerpo}
+                  onChange={e => setPerfil({...perfil, cuerpo: e.target.value})}
+                  rows={6}
+                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-emerald outline-none transition-colors resize-none"
+                  placeholder="Estimados representantes del colegio {{colegio_nombre}},&#10;&#10;Mi nombre es {{nombre}} y les escribo para..."
+                  required
+                ></textarea>
+                <button type="button" onClick={() => setPerfil({...perfil, cuerpo: `Estimados directivos de {{colegio_nombre}},\n\nMe dirijo a ustedes para presentarles mi candidatura espontánea para el área de ${perfil.area_estudios || '___'}. Mi nombre es ${perfil.nombre || '___'}.\n\nAdjunto a este correo mi CV actualizado para que puedan considerar mi perfil en futuras búsquedas.\n\nQuedo a su entera disposición para una entrevista.\n\nAtentamente,\n${perfil.nombre || '___'}\nTel: ${perfil.telefono || '___'}`})} className="text-xs text-emerald font-semibold mt-2 hover:underline">
+                  <i className="fa-solid fa-wand-magic-sparkles mr-1"></i> Generar texto predefinido
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* BLOQUE 3: Carga del CV */}
+          <div className="bg-white rounded-xl p-6 border border-line shadow-sm">
+            <h2 className="text-xl font-bold text-ink mb-4 border-b border-line pb-2">
+              <i className="fa-solid fa-file-pdf text-red-500 mr-2"></i> Bloque 3: Carga de CV
+            </h2>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-semibold text-slate-700 mb-2">Archivo CV (PDF, Max 2MB)</label>
+              <div className="flex items-center gap-4">
+                <label className="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg text-sm font-semibold transition-colors border border-slate-300">
+                  <i className="fa-solid fa-upload mr-2"></i> Seleccionar PDF
+                  <input type="file" accept=".pdf" className="hidden" onChange={handleFileChange} />
+                </label>
+                <span className="text-sm text-slate-500">
+                  {cvFile ? cvFile.name : (perfil.cv_filename ? `Actual: ${perfil.cv_filename}` : 'Ningún archivo seleccionado')}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-2 bg-slate-50 p-3 rounded-lg border border-line mt-4">
               <input 
-                type="file" 
-                accept=".pdf" 
-                onChange={e => setCvFile(e.target.files ? e.target.files[0] : null)}
-                className="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-6 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald/10 file:text-emerald hover:file:bg-emerald/20 cursor-pointer"
+                type="checkbox" 
+                id="terminos" 
+                checked={terminos}
+                onChange={e => setTerminos(e.target.checked)}
+                className="mt-1"
               />
+              <label htmlFor="terminos" className="text-xs text-slate-600 leading-tight cursor-pointer">
+                Declaro que la información contenida en el CV es verdadera y acepto los términos y condiciones para el envío de mis datos a los colegios seleccionados mediante la plataforma.
+              </label>
             </div>
           </div>
-          
-          <div className="flex justify-end pt-6">
-            <button type="submit" disabled={loading} className="bg-emerald text-white px-8 py-3 rounded-xl font-bold hover:bg-emeralddeep transition-colors">
-              {loading ? <i className="fa-solid fa-spinner fa-spin"></i> : "Guardar Cambios"}
+
+          <div className="flex justify-end pt-4">
+            <button 
+              type="submit" 
+              disabled={saving || (!!cvFile && !terminos)}
+              className="bg-emerald hover:bg-emeralddeep text-white font-bold py-3 px-8 rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2 shadow-sm"
+            >
+              {saving ? <i className="fa-solid fa-circle-notch fa-spin"></i> : <i className="fa-solid fa-floppy-disk"></i>}
+              {saving ? 'Guardando...' : 'Guardar Perfil'}
             </button>
           </div>
         </form>

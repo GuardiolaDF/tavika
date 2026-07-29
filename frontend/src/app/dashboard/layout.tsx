@@ -9,8 +9,9 @@ export default function DashboardLayout({
 }) {
   const [email, setEmail] = useState<string | null>(null);
   const [picture, setPicture] = useState<string | null>(null);
-  const [plan, setPlan] = useState<string>("freemium");
+  const [plan, setPlan] = useState<string>("pro"); // default to prevent flicker if pro
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -30,6 +31,7 @@ export default function DashboardLayout({
     setEmail(localStorage.getItem("email"));
     setPicture(localStorage.getItem("picture"));
     setPlan(localStorage.getItem("plan") || "freemium");
+    setMounted(true);
   }, []);
 
   const handleLogout = () => {
@@ -57,7 +59,7 @@ export default function DashboardLayout({
           <a href="/dashboard/profile" className={`sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-colors ${pathname.startsWith('/dashboard/profile') ? 'bg-emerald/12 text-emerald font-semibold active' : 'text-slate-400 hover:bg-emerald/10 hover:text-emerald'}`}>
             <i className="fa-solid fa-address-card w-5 text-center"></i> Mis Datos
           </a>
-          {plan !== "pro" && (
+          {mounted && plan !== "pro" && (
             <div className="mt-auto px-4 pb-6">
               <button 
                 onClick={async () => {
@@ -149,16 +151,16 @@ export default function DashboardLayout({
                 <span className="underline text-xs">Vincular ahora</span>
               </a>
             )}
-            {plan === "pro" ? (
+            {mounted && plan === "pro" ? (
               <div className="bg-emerald/10 border border-emerald/20 rounded-xl px-4 py-2 text-sm">
                 <span className="text-emerald font-bold"><i className="fa-solid fa-crown mr-1"></i> PRO</span>
               </div>
-            ) : (
+            ) : mounted ? (
               <div className="bg-navy/5 border border-navy/15 rounded-xl px-4 py-2 text-sm">
                 <span className="text-slate-500">Plan:</span>
                 <span className="font-semibold text-ink ml-1">Freemium</span>
               </div>
-            )}
+            ) : null}
           </div>
         </header>
 

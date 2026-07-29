@@ -20,6 +20,9 @@ class Usuario(Base):
     dni = Column(String, nullable=True)
     telefono = Column(String, nullable=True)
     
+    asunto_template = Column(String, nullable=True)
+    cuerpo_template = Column(String, nullable=True)
+    
     campanas = relationship("Campana", back_populates="propietario")
 
 class Colegio(Base):

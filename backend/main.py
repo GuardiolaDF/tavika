@@ -18,7 +18,7 @@ try:
             try:
                 conn.execute(text(f"ALTER TABLE colegios ADD COLUMN {col}"))
             except: pass
-        for col in ["cv_filename VARCHAR", "area_estudios VARCHAR", "dni VARCHAR", "telefono VARCHAR"]:
+        for col in ["cv_filename VARCHAR", "area_estudios VARCHAR", "dni VARCHAR", "telefono VARCHAR", "asunto_template VARCHAR", "cuerpo_template VARCHAR"]:
             try:
                 conn.execute(text(f"ALTER TABLE usuarios ADD COLUMN {col}"))
             except: pass

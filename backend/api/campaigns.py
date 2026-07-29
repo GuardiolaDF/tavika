@@ -18,17 +18,21 @@ def get_current_user(email: str, db: Session):
 @router.post("/profile")
 async def update_profile(
     email: str = Form(...),
+    nombre: str = Form(""),
     area_estudios: str = Form(""),
-    dni: str = Form(""),
     telefono: str = Form(""),
+    asunto: str = Form(""),
+    cuerpo: str = Form(""),
     cv: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db)
 ):
     user = get_current_user(email, db)
     
+    user.nombre = nombre
     user.area_estudios = area_estudios
-    user.dni = dni
     user.telefono = telefono
+    user.asunto_template = asunto
+    user.cuerpo_template = cuerpo
     
     if cv:
         if not cv.filename.lower().endswith('.pdf'):
@@ -56,9 +60,11 @@ async def update_profile(
 def get_profile(email: str, db: Session = Depends(get_db)):
     user = get_current_user(email, db)
     return {
+        "nombre": user.nombre or "",
         "area_estudios": user.area_estudios or "",
-        "dni": user.dni or "",
         "telefono": user.telefono or "",
+        "asunto_template": user.asunto_template or "",
+        "cuerpo_template": user.cuerpo_template or "",
         "cv_filename": user.cv_filename,
         "plan": user.plan,
         "envios_restantes": user.envios_restantes
