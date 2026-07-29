@@ -8,6 +8,7 @@ export default function DashboardLayout({
 }) {
   const [email, setEmail] = useState<string | null>(null);
   const [picture, setPicture] = useState<string | null>(null);
+  const [plan, setPlan] = useState<string>("freemium");
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -26,6 +27,7 @@ export default function DashboardLayout({
     
     setEmail(localStorage.getItem("email"));
     setPicture(localStorage.getItem("picture"));
+    setPlan(localStorage.getItem("plan") || "freemium");
   }, []);
 
   const handleLogout = () => {
@@ -38,7 +40,7 @@ export default function DashboardLayout({
       {/* SIDEBAR */}
       <aside className="w-64 min-h-screen bg-ink flex flex-col fixed left-0 top-0 z-40">
         <div className="px-6 py-5 border-b border-white/10">
-          <span className="text-xl font-bold text-white tracking-tight">Távika<span className="text-emerald">Pro</span></span>
+          <a href="/" className="text-xl font-bold text-white tracking-tight block">Távika<span className="text-emerald">Pro</span></a>
         </div>
         <nav className="flex-1 px-3 py-6 space-y-1">
           <a href="/dashboard" className="sidebar-link active flex items-center gap-3 px-4 py-3 rounded-xl text-sm bg-emerald/12 text-emerald font-semibold">
@@ -51,30 +53,32 @@ export default function DashboardLayout({
             <i className="fa-solid fa-paper-plane w-5 text-center"></i> Mis Postulaciones
             <span className="ml-auto bg-emerald text-white text-xs font-bold px-2 py-0.5 rounded-full">3</span>
           </a>
-          <div className="mt-auto px-4 pb-6">
-            <button 
-              onClick={async () => {
-                try {
-                  const rawUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-                  const apiUrl = rawUrl.endsWith('/') ? rawUrl.slice(0, -1) : rawUrl;
-                  const res = await fetch(`${apiUrl}/api/payments/create_preference`, { method: 'POST' });
-                  const data = await res.json();
-                  if (data.init_point) {
-                    window.location.href = data.init_point;
-                  } else {
-                    console.error("MP Error:", data);
-                    alert("Error de MercadoPago: " + (data.error || "Revisa la consola"));
+          {plan !== "pro" && (
+            <div className="mt-auto px-4 pb-6">
+              <button 
+                onClick={async () => {
+                  try {
+                    const rawUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                    const apiUrl = rawUrl.endsWith('/') ? rawUrl.slice(0, -1) : rawUrl;
+                    const res = await fetch(`${apiUrl}/api/payments/create_preference`, { method: 'POST' });
+                    const data = await res.json();
+                    if (data.init_point) {
+                      window.location.href = data.init_point;
+                    } else {
+                      console.error("MP Error:", data);
+                      alert("Error de MercadoPago: " + (data.error || "Revisa la consola"));
+                    }
+                  } catch (error) {
+                    console.error("Error creating payment:", error);
+                    alert("Error de red al conectar con el backend");
                   }
-                } catch (error) {
-                  console.error("Error creating payment:", error);
-                  alert("Error de red al conectar con el backend");
-                }
-              }}
-              className="w-full bg-emerald text-white rounded-xl py-3 font-semibold hover:bg-emeralddeep transition-colors"
-            >
-              <i className="fa-solid fa-bolt w-5 text-center"></i> Comprar Pase
-            </button>
-          </div>
+                }}
+                className="w-full bg-emerald text-white rounded-xl py-3 font-semibold hover:bg-emeralddeep transition-colors"
+              >
+                <i className="fa-solid fa-bolt w-5 text-center"></i> Comprar Pase
+              </button>
+            </div>
+          )}
         </nav>
       </aside>
 
@@ -141,10 +145,16 @@ export default function DashboardLayout({
                 <span className="underline text-xs">Vincular ahora</span>
               </a>
             )}
-            <div className="bg-navy/5 border border-navy/15 rounded-xl px-4 py-2 text-sm">
-              <span className="text-slate-500">Plan:</span>
-              <span className="font-semibold text-ink ml-1">Freemium</span>
-            </div>
+            {plan === "pro" ? (
+              <div className="bg-emerald/10 border border-emerald/20 rounded-xl px-4 py-2 text-sm">
+                <span className="text-emerald font-bold"><i className="fa-solid fa-crown mr-1"></i> PRO</span>
+              </div>
+            ) : (
+              <div className="bg-navy/5 border border-navy/15 rounded-xl px-4 py-2 text-sm">
+                <span className="text-slate-500">Plan:</span>
+                <span className="font-semibold text-ink ml-1">Freemium</span>
+              </div>
+            )}
           </div>
         </header>
 

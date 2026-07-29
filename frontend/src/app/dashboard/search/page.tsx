@@ -106,13 +106,13 @@ export default function SearchPage() {
               <option value="">Todas las Provincias</option>
               {provinciasOpt.map(p => <option key={p} value={p}>{p}</option>)}
             </select>
+            <select name="distrito" value={filters.distrito} onChange={handleFilterChange} className="border border-line rounded-xl px-4 py-2.5 text-sm bg-white outline-none focus:ring-2 focus:ring-emerald/20 transition-all flex-1 w-full md:w-auto" disabled={!filters.provincia || distritosOpt.length === 0}>
+              <option value="">Todos los Distritos</option>
+              {distritosOpt.map(d => <option key={d} value={d}>{d}</option>)}
+            </select>
             <select name="ciudad" value={filters.ciudad} onChange={handleFilterChange} className="border border-line rounded-xl px-4 py-2.5 text-sm bg-white outline-none focus:ring-2 focus:ring-emerald/20 transition-all flex-1 w-full md:w-auto" disabled={!filters.provincia || ciudadesOpt.length === 0}>
               <option value="">Todas las Ciudades</option>
               {ciudadesOpt.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-            <select name="distrito" value={filters.distrito} onChange={handleFilterChange} className="border border-line rounded-xl px-4 py-2.5 text-sm bg-white outline-none focus:ring-2 focus:ring-emerald/20 transition-all flex-1 w-full md:w-auto" disabled={(!filters.provincia && !filters.ciudad) || distritosOpt.length === 0}>
-              <option value="">Todos los Distritos</option>
-              {distritosOpt.map(d => <option key={d} value={d}>{d}</option>)}
             </select>
             <select name="nivel" value={filters.nivel} onChange={handleFilterChange} className="border border-line rounded-xl px-4 py-2.5 text-sm bg-white outline-none focus:ring-2 focus:ring-emerald/20 transition-all flex-1 w-full md:w-auto">
               <option value="">Todos los Niveles</option>

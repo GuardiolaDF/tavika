@@ -44,7 +44,7 @@ def get_stats(db: Session = Depends(get_db), admin: str = Depends(get_admin_user
     }
 
 @router.get("/colegios")
-def list_colegios(skip: int = 0, limit: int = 100, estado: str = None, provincia: str = None, ciudad: str = None, distrito: str = None, nivel: str = None, db: Session = Depends(get_db), admin: str = Depends(get_admin_user)):
+def list_colegios(skip: int = 0, limit: int = 100, estado: str = None, provincia: str = None, ciudad: str = None, distrito: str = None, nivel: str = None, db: Session = Depends(get_db)):
     """ Endpoint para ver el estado de la base de datos de colegios """
     query = db.query(Colegio)
     if estado:
@@ -113,7 +113,20 @@ class TemplateUpdate(BaseModel):
 def get_template(db: Session = Depends(get_db), admin: str = Depends(get_admin_user)):
     conf = db.query(Configuracion).filter(Configuracion.clave == "global_template").first()
     if not conf:
-        return {"asunto": "Campaña de Prueba", "cuerpo": "Hola {{nombre_colegio}}"}
+        asunto = "Propuesta de valor y colaboración - {{nombre_colegio}}"
+        cuerpo = """Hola equipo de {{nombre_colegio}},
+
+Mi nombre es Fabián, soy docente argentino y entiendo perfectamente lo frustrante y difícil que puede ser la búsqueda laboral en nuestro sector, mandando currículums a ciegas sin saber si llegan a destino.
+
+Por eso creé este emprendimiento: una herramienta hecha a pulmón por un colega para ayudar a otros docentes a conectar de forma más directa y eficiente con instituciones como la suya en {{distrito}}, {{ciudad}} ({{provincia}}).
+
+Me encantaría saber si actualmente tienen vacantes en el nivel {{nivel}} o si estarían abiertos a recibir perfiles valiosos que forman parte de nuestra comunidad.
+
+Quedo a su entera disposición y les agradezco de corazón el tiempo.
+
+¡Un saludo enorme!
+Fabián"""
+        return {"asunto": asunto, "cuerpo": cuerpo}
     return json.loads(conf.valor)
 
 @router.post("/template")
