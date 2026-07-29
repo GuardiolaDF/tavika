@@ -14,18 +14,24 @@ Base.metadata.create_all(bind=engine)
 # Migración rápida para agregar nuevas columnas
 try:
     with engine.connect() as conn:
-        for col in ["ciudad VARCHAR"]:
+        for col in ["provincia VARCHAR", "ciudad VARCHAR", "distrito VARCHAR", "sector VARCHAR", "nivel VARCHAR", "email VARCHAR", "origen VARCHAR", "estado VARCHAR", "fecha_actualizacion DATETIME"]:
             try:
                 conn.execute(text(f"ALTER TABLE colegios ADD COLUMN {col}"))
-            except: pass
+                conn.commit()
+            except:
+                conn.rollback()
         for col in ["cv_filename VARCHAR", "area_estudios VARCHAR", "dni VARCHAR", "telefono VARCHAR", "asunto_template VARCHAR", "cuerpo_template VARCHAR"]:
             try:
                 conn.execute(text(f"ALTER TABLE usuarios ADD COLUMN {col}"))
-            except: pass
+                conn.commit()
+            except:
+                conn.rollback()
         for col in ["cv_utilizado VARCHAR"]:
             try:
                 conn.execute(text(f"ALTER TABLE campanas ADD COLUMN {col}"))
-            except: pass
+                conn.commit()
+            except:
+                conn.rollback()
         conn.commit()
 except Exception as e:
     pass

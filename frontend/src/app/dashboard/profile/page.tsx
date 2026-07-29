@@ -60,8 +60,8 @@ export default function ProfilePage() {
       formData.append("nombre", perfil.nombre);
       formData.append("area_estudios", perfil.area_estudios);
       formData.append("telefono", perfil.telefono);
-      formData.append("asunto_template", perfil.asunto);
-      formData.append("cuerpo_template", perfil.cuerpo);
+      formData.append("asunto", perfil.asunto);
+      formData.append("cuerpo", perfil.cuerpo);
       if (cvFile) formData.append("cv", cvFile);
       
       const res = await fetch(`${apiUrl}/api/campaigns/profile`, {
