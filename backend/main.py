@@ -13,12 +13,12 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(title="Távika API")
 
 # OAuth requiere session middleware
-# Usamos same_site="none" y https_only=True porque Google hace un redirect de vuelta (cross-site)
-# y los navegadores estrictos (como Brave o Safari) pueden bloquear la cookie de sesión si es Lax.
+# Usamos same_site="lax" y https_only=True porque Google hace un redirect de vuelta (cross-site GET)
+# y los navegadores estrictos (como Brave) bloquean third-party cookies si usamos "none".
 app.add_middleware(
     SessionMiddleware, 
     secret_key=os.getenv("SECRET_KEY", "super-secret-key"),
-    same_site="none",
+    same_site="lax",
     https_only=True
 )
 
