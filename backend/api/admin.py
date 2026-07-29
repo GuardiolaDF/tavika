@@ -44,9 +44,15 @@ def get_stats(db: Session = Depends(get_db), admin: str = Depends(get_admin_user
     }
 
 @router.get("/colegios")
-def list_colegios(skip: int = 0, limit: int = 100, estado: str = None, provincia: str = None, ciudad: str = None, distrito: str = None, nivel: str = None, db: Session = Depends(get_db)):
+def list_colegios(skip: int = 0, limit: int = 100, estado: str = None, provincia: str = None, ciudad: str = None, distrito: str = None, nivel: str = None, q: str = None, admin_view: bool = False, db: Session = Depends(get_db)):
     """ Endpoint para ver el estado de la base de datos de colegios """
     query = db.query(Colegio)
+    if not admin_view:
+        query = query.filter(Colegio.sector.ilike("%privado%"))
+    
+    if q:
+        query = query.filter(Colegio.nombre.ilike(f"%{q}%"))
+        
     if estado:
         if estado == "con_mail":
             query = query.filter(Colegio.email.isnot(None))

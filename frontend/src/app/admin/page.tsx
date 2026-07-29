@@ -104,7 +104,7 @@ export default function AdminPanel() {
   const fetchColegios = async (t: string, currentFilters: any, currentSkip: number, reset: boolean = false) => {
     try {
       setLoading(true);
-      let query = `?limit=50&skip=${currentSkip}`;
+      let query = `?limit=50&skip=${currentSkip}&admin_view=true`;
       if (currentFilters.estado) query += `&estado=${encodeURIComponent(currentFilters.estado)}`;
       if (currentFilters.provincia) query += `&provincia=${encodeURIComponent(currentFilters.provincia)}`;
       if (currentFilters.ciudad) query += `&ciudad=${encodeURIComponent(currentFilters.ciudad)}`;

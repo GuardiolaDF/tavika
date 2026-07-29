@@ -1,4 +1,20 @@
+"use client";
+import { useEffect, useState } from "react";
+
 export default function Dashboard() {
+  const [stats, setStats] = useState({
+    mails_enviados: 0,
+    mails_exitosos: 0,
+    colegios_base: 0,
+    envios_restantes: 10
+  });
+
+  useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/dashboard/stats`)
+      .then(res => res.json())
+      .then(data => setStats(data))
+      .catch(() => {});
+  }, []);
   return (
     <>
       <div id="info-banner" className="flex items-start gap-4 bg-navy/5 border border-navy/15 rounded-2xl p-5 mb-8">
@@ -19,7 +35,7 @@ export default function Dashboard() {
               <i className="fa-solid fa-envelope text-blue-500 text-sm"></i>
             </div>
           </div>
-          <p className="text-3xl font-bold text-ink">0</p>
+          <p className="text-3xl font-bold text-ink">{stats.mails_enviados}</p>
         </div>
         
         <div className="bg-paper rounded-2xl border border-line p-6 shadow-sm hover:shadow-md transition-shadow">
@@ -29,7 +45,7 @@ export default function Dashboard() {
               <i className="fa-solid fa-circle-check text-emerald text-sm"></i>
             </div>
           </div>
-          <p className="text-3xl font-bold text-ink">0</p>
+          <p className="text-3xl font-bold text-ink">{stats.mails_exitosos}</p>
         </div>
 
         <div className="bg-paper rounded-2xl border border-line p-6 shadow-sm hover:shadow-md transition-shadow">
@@ -39,7 +55,7 @@ export default function Dashboard() {
               <i className="fa-solid fa-school text-purple-500 text-sm"></i>
             </div>
           </div>
-          <p className="text-3xl font-bold text-ink">3,450</p>
+          <p className="text-3xl font-bold text-ink">{stats.colegios_base.toLocaleString()}</p>
         </div>
 
         <div className="bg-paper rounded-2xl border border-line p-6 shadow-sm hover:shadow-md transition-shadow">
@@ -49,7 +65,7 @@ export default function Dashboard() {
               <i className="fa-solid fa-bolt text-amber text-sm"></i>
             </div>
           </div>
-          <p className="text-3xl font-bold text-ink">50</p>
+          <p className="text-3xl font-bold text-ink">{stats.envios_restantes}</p>
         </div>
       </div>
 

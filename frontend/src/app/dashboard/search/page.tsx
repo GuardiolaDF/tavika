@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 export default function SearchPage() {
   const [loading, setLoading] = useState(false);
   const [colegios, setColegios] = useState<any[]>([]);
+  const [q, setQ] = useState("");
   const [filters, setFilters] = useState({ provincia: "", ciudad: "", distrito: "", nivel: "" });
   const [skip, setSkip] = useState(0);
   const [hasMore, setHasMore] = useState(true);
@@ -22,6 +23,14 @@ export default function SearchPage() {
     } catch(e) {}
     return [];
   };
+
+  useEffect(() => {
+    // Avoid spamming requests on typing
+    const delay = setTimeout(() => {
+      fetchColegios(filters, 0, true);
+    }, 500);
+    return () => clearTimeout(delay);
+  }, [filters, q]);
 
   useEffect(() => {
     fetchOptions("provincias").then(setProvinciasOpt);
@@ -50,6 +59,7 @@ export default function SearchPage() {
     try {
       setLoading(true);
       let query = `?limit=50&skip=${currentSkip}`;
+      if (q) query += `&q=${encodeURIComponent(q)}`;
       if (currentFilters.provincia) query += `&provincia=${encodeURIComponent(currentFilters.provincia)}`;
       if (currentFilters.ciudad) query += `&ciudad=${encodeURIComponent(currentFilters.ciudad)}`;
       if (currentFilters.distrito) query += `&distrito=${encodeURIComponent(currentFilters.distrito)}`;
@@ -81,7 +91,6 @@ export default function SearchPage() {
     if (e.target.name === "ciudad") { newFilters.distrito = ""; }
     setFilters(newFilters);
     setSkip(0);
-    fetchColegios(newFilters, 0, true);
   };
 
   const loadMore = () => {
@@ -95,6 +104,19 @@ export default function SearchPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-ink mb-2">Buscador de Colegios</h1>
         <p className="text-slate-500">Explorá nuestra base de datos nacional y prepará tu próxima campaña.</p>
+      </div>
+
+      <div className="flex flex-col md:flex-row gap-4 mb-6">
+        <div className="flex-1 relative">
+          <i className="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <input 
+            type="text" 
+            placeholder="Buscar escuela por nombre..." 
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            className="w-full pl-10 pr-4 py-3 bg-white border border-line rounded-xl outline-none focus:border-emerald shadow-sm transition-colors"
+          />
+        </div>
       </div>
 
       <div className="bg-paper rounded-2xl border border-line overflow-hidden shadow-sm">

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 export default function DashboardLayout({
   children,
@@ -10,6 +11,7 @@ export default function DashboardLayout({
   const [picture, setPicture] = useState<string | null>(null);
   const [plan, setPlan] = useState<string>("freemium");
   const [menuOpen, setMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -43,16 +45,16 @@ export default function DashboardLayout({
           <a href="/" className="text-xl font-bold text-white tracking-tight block">Távika<span className="text-emerald">Pro</span></a>
         </div>
         <nav className="flex-1 px-3 py-6 space-y-1">
-          <a href="/dashboard" className="sidebar-link active flex items-center gap-3 px-4 py-3 rounded-xl text-sm bg-emerald/12 text-emerald font-semibold">
+          <a href="/dashboard" className={`sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-colors ${pathname === '/dashboard' ? 'bg-emerald/12 text-emerald font-semibold active' : 'text-slate-400 hover:bg-emerald/10 hover:text-emerald'}`}>
             <i className="fa-solid fa-house w-5 text-center"></i> Inicio
           </a>
-          <a href="/dashboard/search" className="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-slate-400 hover:bg-emerald/10 hover:text-emerald transition-colors">
+          <a href="/dashboard/search" className={`sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-colors ${pathname.startsWith('/dashboard/search') ? 'bg-emerald/12 text-emerald font-semibold active' : 'text-slate-400 hover:bg-emerald/10 hover:text-emerald'}`}>
             <i className="fa-solid fa-magnifying-glass w-5 text-center"></i> Buscar Colegios
           </a>
-          <a href="/dashboard/campaigns" className="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-slate-400 hover:bg-emerald/10 hover:text-emerald transition-colors">
+          <a href="/dashboard/campaigns" className={`sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-colors ${pathname.startsWith('/dashboard/campaigns') ? 'bg-emerald/12 text-emerald font-semibold active' : 'text-slate-400 hover:bg-emerald/10 hover:text-emerald'}`}>
             <i className="fa-solid fa-paper-plane w-5 text-center"></i> Mis Campañas
           </a>
-          <a href="/dashboard/profile" className="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-slate-400 hover:bg-emerald/10 hover:text-emerald transition-colors">
+          <a href="/dashboard/profile" className={`sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-colors ${pathname.startsWith('/dashboard/profile') ? 'bg-emerald/12 text-emerald font-semibold active' : 'text-slate-400 hover:bg-emerald/10 hover:text-emerald'}`}>
             <i className="fa-solid fa-address-card w-5 text-center"></i> Mis Datos
           </a>
           {plan !== "pro" && (

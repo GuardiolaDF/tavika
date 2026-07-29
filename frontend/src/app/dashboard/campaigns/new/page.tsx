@@ -19,6 +19,7 @@ export default function NewCampaign() {
   
   // Targeting state
   const [filters, setFilters] = useState({ provincia: "", ciudad: "", distrito: "", nivel: "" });
+  const [q, setQ] = useState("");
   const [colegios, setColegios] = useState<any[]>([]);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [targetingLoading, setTargetingLoading] = useState(false);
@@ -90,6 +91,7 @@ export default function NewCampaign() {
   const searchColegios = async () => {
     setTargetingLoading(true);
     let query = `?limit=100&skip=0`;
+    if (q) query += `&q=${encodeURIComponent(q)}`;
     if (filters.provincia) query += `&provincia=${encodeURIComponent(filters.provincia)}`;
     if (filters.ciudad) query += `&ciudad=${encodeURIComponent(filters.ciudad)}`;
     if (filters.distrito) query += `&distrito=${encodeURIComponent(filters.distrito)}`;
@@ -113,8 +115,11 @@ export default function NewCampaign() {
   };
   
   useEffect(() => {
-    searchColegios();
-  }, [filters]);
+    const delay = setTimeout(() => {
+      searchColegios();
+    }, 500);
+    return () => clearTimeout(delay);
+  }, [filters, q]);
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -310,7 +315,17 @@ export default function NewCampaign() {
               </div>
             </div>
             
-            <div className="flex flex-wrap gap-4 bg-slate-50 p-4 rounded-xl border border-line">
+            <div className="flex flex-col md:flex-row gap-4 bg-slate-50 p-4 rounded-xl border border-line">
+              <div className="flex-1 min-w-[200px] relative">
+                <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input 
+                  type="text" 
+                  placeholder="Buscar por nombre..." 
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 border border-line rounded-lg text-sm bg-white outline-none focus:border-emerald"
+                />
+              </div>
               <select name="provincia" value={filters.provincia} onChange={handleFilterChange} className="border border-line rounded-lg px-3 py-2 text-sm bg-white outline-none flex-1 min-w-[150px]">
                 <option value="">Provincias</option>
                 {provinciasOpt.map(p => <option key={p} value={p}>{p}</option>)}

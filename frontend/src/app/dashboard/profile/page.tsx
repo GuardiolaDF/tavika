@@ -12,7 +12,10 @@ export default function ProfilePage() {
     const email = localStorage.getItem("email");
     if (email) {
       fetch(`${apiUrl}/api/campaigns/profile?email=${encodeURIComponent(email)}`)
-        .then(res => res.json())
+        .then(res => {
+          if (!res.ok) throw new Error("No profile");
+          return res.json();
+        })
         .then(data => {
           setPerfil({
             area_estudios: data.area_estudios || "",
@@ -21,7 +24,8 @@ export default function ProfilePage() {
             cv_filename: data.cv_filename || ""
           });
           setFetching(false);
-        });
+        })
+        .catch(() => setFetching(false));
     }
   }, []);
 
