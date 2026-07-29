@@ -1,9 +1,14 @@
 "use client";
 
 import Link from 'next/link';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Home() {
+  const [token, setToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    setToken(localStorage.getItem("token"));
+  }, []);
   return (
     <>
       {/* Header */}
@@ -26,9 +31,15 @@ export default function Home() {
             </nav>
           </div>
           <div className="flex items-center space-x-4">
-            <a href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/auth/login`} className="hidden sm:inline-block text-sm font-medium text-white/70 hover:text-white px-3 py-2 transition-colors">
-              Iniciar Sesión
-            </a>
+            {token ? (
+              <a href="/dashboard" className="hidden sm:inline-block text-sm font-medium text-white/70 hover:text-white px-3 py-2 transition-colors">
+                Ir a tu Dashboard
+              </a>
+            ) : (
+              <a href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/auth/login`} className="hidden sm:inline-block text-sm font-medium text-white/70 hover:text-white px-3 py-2 transition-colors">
+                Iniciar Sesión
+              </a>
+            )}
             <Link href="#pricing" className="bg-emerald hover:bg-emeralddeep text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-all duration-300 shadow-md shadow-emerald/20">
               Probar Gratis
             </Link>
@@ -193,7 +204,7 @@ export default function Home() {
                 </div>
                 <p className="text-slate-600 mb-8">Para empezar a conocer la herramienta</p>
                 <ul className="space-y-4 mb-8 flex-grow">
-                  <li className="flex items-center text-slate-700"><i className="fa-solid fa-check text-emerald mr-3"></i>Hasta 50 envíos</li>
+                  <li className="flex items-center text-slate-700"><i className="fa-solid fa-check text-emerald mr-3"></i>Hasta 10 envíos</li>
                   <li className="flex items-center text-slate-700"><i className="fa-solid fa-check text-emerald mr-3"></i>Base de datos completa</li>
                   <li className="flex items-center text-slate-700"><i className="fa-solid fa-check text-emerald mr-3"></i>Filtros básicos</li>
                 </ul>

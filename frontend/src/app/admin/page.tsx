@@ -263,7 +263,7 @@ export default function AdminPanel() {
                       <th className="p-4 font-medium">Ubicación</th>
                       <th className="p-4 font-medium">Nivel</th>
                       <th className="p-4 font-medium">Email</th>
-                      <th className="p-4 font-medium">Estado</th>
+                      <th className="p-4 font-medium min-w-[120px]">Estado</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-line">
@@ -273,7 +273,7 @@ export default function AdminPanel() {
                         <td className="p-4 text-slate-500">{col.provincia}{col.ciudad ? ` - ${col.ciudad}` : ''}{col.distrito ? ` - ${col.distrito}` : ''}</td>
                         <td className="p-4 text-slate-500">{col.nivel}</td>
                         <td className="p-4 text-slate-500">{col.email || "Sin email"}</td>
-                        <td className="p-4">
+                        <td className="p-4 min-w-[120px]">
                           {col.estado === "verificado" ? (
                             <span className="bg-emerald/10 text-emerald px-2.5 py-1 rounded-full text-xs font-bold tracking-wide">VERIFICADO</span>
                           ) : col.estado === "roto" ? (

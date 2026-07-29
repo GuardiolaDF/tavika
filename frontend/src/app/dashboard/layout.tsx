@@ -49,9 +49,11 @@ export default function DashboardLayout({
           <a href="/dashboard/search" className="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-slate-400 hover:bg-emerald/10 hover:text-emerald transition-colors">
             <i className="fa-solid fa-magnifying-glass w-5 text-center"></i> Buscar Colegios
           </a>
-          <a href="#" className="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-slate-400 hover:bg-emerald/10 hover:text-emerald transition-colors">
-            <i className="fa-solid fa-paper-plane w-5 text-center"></i> Mis Postulaciones
-            <span className="ml-auto bg-emerald text-white text-xs font-bold px-2 py-0.5 rounded-full">3</span>
+          <a href="/dashboard/campaigns" className="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-slate-400 hover:bg-emerald/10 hover:text-emerald transition-colors">
+            <i className="fa-solid fa-paper-plane w-5 text-center"></i> Mis Campañas
+          </a>
+          <a href="/dashboard/profile" className="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-slate-400 hover:bg-emerald/10 hover:text-emerald transition-colors">
+            <i className="fa-solid fa-address-card w-5 text-center"></i> Mis Datos
           </a>
           {plan !== "pro" && (
             <div className="mt-auto px-4 pb-6">

@@ -5,6 +5,9 @@ from starlette.requests import Request
 from starlette.responses import RedirectResponse
 import os
 import urllib.parse
+from database.database import get_db
+from database.models import Usuario
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 
@@ -41,7 +44,7 @@ async def login(request: Request):
     return await oauth.google.authorize_redirect(request, redirect_uri, access_type='offline', prompt='consent')
 
 @router.get("/callback")
-async def auth_callback(request: Request):
+async def auth_callback(request: Request, db: Session = Depends(get_db)):
     try:
         token = await oauth.google.authorize_access_token(request)
         user_info = token.get('userinfo')
@@ -49,11 +52,13 @@ async def auth_callback(request: Request):
         if not user_info:
             raise HTTPException(status_code=400, detail="Error fetching user info")
             
-        # TODO: Guardar en la DB el usuario y el refresh_token
-        # user = db.query(Usuario).filter(email=user_info.email).first()
-        # if not user:
-        #    user = Usuario(email=user_info.email, ...)
-        # user.gmail_token = token.get('refresh_token')
+        user = db.query(Usuario).filter(Usuario.email == user_info.email).first()
+        if not user:
+            user = Usuario(email=user_info.email, nombre=user_info.get("name", ""))
+            db.add(user)
+        if token.get('refresh_token'):
+            user.gmail_token = token.get('refresh_token')
+        db.commit()
         
         # Extraer imagen y encodearla
         picture_url = urllib.parse.quote(user_info.get('picture', ''))

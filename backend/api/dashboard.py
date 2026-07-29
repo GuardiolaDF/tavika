@@ -16,15 +16,13 @@ def get_dashboard_stats(db: Session = Depends(get_db)):
     # Total de colegios sanos en la base global
     from database.models import Colegio
     colegios_totales = db.query(Colegio).count()
-    if colegios_totales == 0:
-        colegios_totales = 3450 # Fake data para ver en la UI hasta tener datos reales
         
     # Fake stats de campañas del usuario
     stats = {
         "mails_enviados": 0,
         "mails_exitosos": 0,
         "colegios_base": colegios_totales,
-        "envios_restantes": 50,
+        "envios_restantes": 10,
         "campanas_recientes": []
     }
     

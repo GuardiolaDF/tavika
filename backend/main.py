@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 import os
-from api import auth, dashboard, admin, payments
+from api import auth, dashboard, admin, payments, campaigns
 from database.database import engine, Base
 from database import models
 from sqlalchemy import text
@@ -11,13 +11,24 @@ from sqlalchemy import text
 # Crear las tablas en la base de datos automáticamente si no existen
 Base.metadata.create_all(bind=engine)
 
-# Migración rápida para agregar la columna 'ciudad' a la tabla existente
+# Migración rápida para agregar nuevas columnas
 try:
     with engine.connect() as conn:
-        conn.execute(text("ALTER TABLE colegios ADD COLUMN ciudad VARCHAR"))
+        for col in ["ciudad VARCHAR"]:
+            try:
+                conn.execute(text(f"ALTER TABLE colegios ADD COLUMN {col}"))
+            except: pass
+        for col in ["cv_filename VARCHAR", "area_estudios VARCHAR", "dni VARCHAR", "telefono VARCHAR"]:
+            try:
+                conn.execute(text(f"ALTER TABLE usuarios ADD COLUMN {col}"))
+            except: pass
+        for col in ["cv_utilizado VARCHAR"]:
+            try:
+                conn.execute(text(f"ALTER TABLE campanas ADD COLUMN {col}"))
+            except: pass
         conn.commit()
 except Exception as e:
-    pass # Ya existe o error
+    pass
 
 app = FastAPI(title="Távika API")
 
@@ -48,6 +59,7 @@ app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(dashboard.router, prefix="/api/dashboard", tags=["dashboard"])
 app.include_router(admin.router, prefix="/api/admin", tags=["admin"])
 app.include_router(payments.router, prefix="/api/payments", tags=["payments"])
+app.include_router(campaigns.router, prefix="/api/campaigns", tags=["campaigns"])
 
 @app.get("/")
 def read_root():

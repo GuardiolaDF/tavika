@@ -13,7 +13,12 @@ class Usuario(Base):
     is_admin = Column(Boolean, default=False)
     gmail_token = Column(String, nullable=True) # Guardará el refresh token de OAuth2
     plan = Column(String, default="freemium")
-    envios_restantes = Column(Integer, default=30)
+    envios_restantes = Column(Integer, default=10)
+    
+    cv_filename = Column(String, nullable=True)
+    area_estudios = Column(String, nullable=True)
+    dni = Column(String, nullable=True)
+    telefono = Column(String, nullable=True)
     
     campanas = relationship("Campana", back_populates="propietario")
 
@@ -40,6 +45,7 @@ class Campana(Base):
     propietario_id = Column(Integer, ForeignKey("usuarios.id"))
     asunto_template = Column(String)
     cuerpo_template = Column(String)
+    cv_utilizado = Column(String, nullable=True)
     fecha_creacion = Column(DateTime, default=datetime.datetime.utcnow)
     estado = Column(String, default="pendiente") # pendiente, en_progreso, completado
     
