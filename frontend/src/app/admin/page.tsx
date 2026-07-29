@@ -336,7 +336,7 @@ export default function AdminPanel() {
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value) => value.toLocaleString()} />
+                    <Tooltip formatter={(value: any) => value ? value.toLocaleString() : ''} />
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="flex justify-center gap-6 text-sm font-medium">
