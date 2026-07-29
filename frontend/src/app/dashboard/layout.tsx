@@ -1,10 +1,28 @@
 "use client";
+import { useEffect, useState } from "react";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const [email, setEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+    const userEmail = params.get("email");
+    
+    if (token && userEmail) {
+      localStorage.setItem("token", token);
+      localStorage.setItem("email", userEmail);
+      // Limpiar la URL para que no quede el token expuesto
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    
+    setEmail(localStorage.getItem("email"));
+  }, []);
+
   return (
     <div className="bg-surface text-slate-800 flex min-h-screen">
       {/* SIDEBAR */}
@@ -59,11 +77,25 @@ export default function DashboardLayout({
             <p className="text-xs text-slate-400">Dashboard Principal</p>
           </div>
           <div className="flex items-center gap-4">
-            <a href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/auth/login`} className="flex items-center gap-2 bg-amber/10 border border-amber/30 text-amber-700 rounded-xl px-4 py-2 text-sm font-medium cursor-pointer hover:bg-amber/15 transition-colors">
-              <i className="fa-solid fa-triangle-exclamation"></i>
-              <span>Gmail no vinculado</span>
-              <span className="underline text-xs">Vincular ahora</span>
-            </a>
+            {email ? (
+              <div className="flex items-center gap-4">
+                {email === "tavika.app@gmail.com" && (
+                  <a href="/admin" className="bg-purple-100 text-purple-700 hover:bg-purple-200 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors">
+                    <i className="fa-solid fa-lock"></i> Panel Admin
+                  </a>
+                )}
+                <div className="flex items-center gap-2 bg-slate-100 border border-line text-slate-700 rounded-xl px-4 py-2 text-sm font-medium">
+                  <i className="fa-brands fa-google text-slate-400"></i>
+                  <span>{email}</span>
+                </div>
+              </div>
+            ) : (
+              <a href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/auth/login`} className="flex items-center gap-2 bg-amber/10 border border-amber/30 text-amber-700 rounded-xl px-4 py-2 text-sm font-medium cursor-pointer hover:bg-amber/15 transition-colors">
+                <i className="fa-solid fa-triangle-exclamation"></i>
+                <span>Gmail no vinculado</span>
+                <span className="underline text-xs">Vincular ahora</span>
+              </a>
+            )}
             <div className="bg-navy/5 border border-navy/15 rounded-xl px-4 py-2 text-sm">
               <span className="text-slate-500">Plan:</span>
               <span className="font-semibold text-ink ml-1">Freemium</span>

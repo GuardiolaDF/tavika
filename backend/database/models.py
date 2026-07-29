@@ -56,3 +56,9 @@ class Postulacion(Base):
 
     campana = relationship("Campana", back_populates="postulaciones")
     colegio = relationship("Colegio")
+
+class Configuracion(Base):
+    __tablename__ = "configuracion"
+    
+    clave = Column(String, primary_key=True, index=True)
+    valor = Column(String)

@@ -56,7 +56,8 @@ async def auth_callback(request: Request):
         
         # Redirigir al frontend al dashboard
         frontend_url = os.getenv("FRONTEND_URL", "https://tavika.up.railway.app").rstrip("/")
-        return RedirectResponse(url=f"{frontend_url}/dashboard?login=success")
+        # Enviamos el token y el email en la URL para que el frontend los guarde en localStorage
+        return RedirectResponse(url=f"{frontend_url}/dashboard?login=success&token={token.get('access_token')}&email={user_info['email']}")
         
     except Exception as e:
         debug_info = {
