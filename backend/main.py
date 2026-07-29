@@ -13,7 +13,14 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(title="Távika API")
 
 # OAuth requiere session middleware
-app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY", "super-secret-key"))
+# Usamos same_site="none" y https_only=True porque Google hace un redirect de vuelta (cross-site)
+# y los navegadores estrictos (como Brave o Safari) pueden bloquear la cookie de sesión si es Lax.
+app.add_middleware(
+    SessionMiddleware, 
+    secret_key=os.getenv("SECRET_KEY", "super-secret-key"),
+    same_site="none",
+    https_only=True
+)
 
 # Configuración básica de CORS para que el frontend pueda conectarse
 app.add_middleware(
