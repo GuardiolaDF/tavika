@@ -31,22 +31,35 @@ def get_admin_user(credentials: HTTPAuthorizationCredentials = Security(security
 @router.get("/stats")
 def get_stats(db: Session = Depends(get_db), admin: str = Depends(get_admin_user)):
     total = db.query(Colegio).count()
-    sanos = db.query(Colegio).filter(Colegio.estado == "sano").count()
-    rotos = db.query(Colegio).filter(Colegio.estado == "roto").count()
+    con_mail = db.query(Colegio).filter(Colegio.email.isnot(None)).count()
+    sin_mail = db.query(Colegio).filter(Colegio.email.is_(None)).count()
+    verificados = db.query(Colegio).filter(Colegio.estado == "verificado").count()
+    rebotados = db.query(Colegio).filter(Colegio.estado == "roto").count()
     return {
         "total": total,
-        "sanos": sanos,
-        "rotos": rotos
+        "con_mail": con_mail,
+        "sin_mail": sin_mail,
+        "verificados": verificados,
+        "rebotados": rebotados
     }
 
 @router.get("/colegios")
-def list_colegios(skip: int = 0, limit: int = 100, estado: str = None, provincia: str = None, nivel: str = None, db: Session = Depends(get_db), admin: str = Depends(get_admin_user)):
+def list_colegios(skip: int = 0, limit: int = 100, estado: str = None, provincia: str = None, ciudad: str = None, distrito: str = None, nivel: str = None, db: Session = Depends(get_db), admin: str = Depends(get_admin_user)):
     """ Endpoint para ver el estado de la base de datos de colegios """
     query = db.query(Colegio)
     if estado:
-        query = query.filter(Colegio.estado == estado)
+        if estado == "con_mail":
+            query = query.filter(Colegio.email.isnot(None))
+        elif estado == "sin_mail":
+            query = query.filter(Colegio.email.is_(None))
+        else:
+            query = query.filter(Colegio.estado == estado)
     if provincia:
         query = query.filter(Colegio.provincia.ilike(f"%{provincia}%"))
+    if ciudad:
+        query = query.filter(Colegio.ciudad.ilike(f"%{ciudad}%"))
+    if distrito:
+        query = query.filter(Colegio.distrito.ilike(f"%{distrito}%"))
     if nivel:
         query = query.filter(Colegio.nivel.ilike(f"%{nivel}%"))
     
@@ -57,6 +70,34 @@ def list_colegios(skip: int = 0, limit: int = 100, estado: str = None, provincia
         "total": total,
         "colegios": colegios
     }
+
+@router.get("/provincias")
+def get_provincias(db: Session = Depends(get_db)):
+    provincias = db.query(Colegio.provincia).filter(Colegio.provincia.isnot(None)).distinct().order_by(Colegio.provincia).all()
+    return [p[0] for p in provincias if p[0]]
+
+@router.get("/ciudades")
+def get_ciudades(provincia: str = None, db: Session = Depends(get_db)):
+    query = db.query(Colegio.ciudad).filter(Colegio.ciudad.isnot(None))
+    if provincia:
+        query = query.filter(Colegio.provincia == provincia)
+    ciudades = query.distinct().order_by(Colegio.ciudad).all()
+    return [c[0] for c in ciudades if c[0]]
+
+@router.get("/distritos")
+def get_distritos(provincia: str = None, ciudad: str = None, db: Session = Depends(get_db)):
+    query = db.query(Colegio.distrito).filter(Colegio.distrito.isnot(None))
+    if provincia:
+        query = query.filter(Colegio.provincia == provincia)
+    if ciudad:
+        query = query.filter(Colegio.ciudad == ciudad)
+    distritos = query.distinct().order_by(Colegio.distrito).all()
+    return [d[0] for d in distritos if d[0]]
+
+@router.get("/niveles")
+def get_niveles(db: Session = Depends(get_db)):
+    niveles = db.query(Colegio.nivel).filter(Colegio.nivel.isnot(None)).distinct().order_by(Colegio.nivel).all()
+    return [n[0] for n in niveles if n[0]]
 
 @router.post("/limpiar_rebotes")
 def clean_bounced_emails(db: Session = Depends(get_db), admin: str = Depends(get_admin_user)):

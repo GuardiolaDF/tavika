@@ -6,9 +6,18 @@ import os
 from api import auth, dashboard, admin, payments
 from database.database import engine, Base
 from database import models
+from sqlalchemy import text
 
 # Crear las tablas en la base de datos automáticamente si no existen
 Base.metadata.create_all(bind=engine)
+
+# Migración rápida para agregar la columna 'ciudad' a la tabla existente
+try:
+    with engine.connect() as conn:
+        conn.execute(text("ALTER TABLE colegios ADD COLUMN ciudad VARCHAR"))
+        conn.commit()
+except Exception as e:
+    pass # Ya existe o error
 
 app = FastAPI(title="Távika API")
 

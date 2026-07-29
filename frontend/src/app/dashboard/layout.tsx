@@ -44,7 +44,7 @@ export default function DashboardLayout({
           <a href="/dashboard" className="sidebar-link active flex items-center gap-3 px-4 py-3 rounded-xl text-sm bg-emerald/12 text-emerald font-semibold">
             <i className="fa-solid fa-house w-5 text-center"></i> Inicio
           </a>
-          <a href="#" className="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-slate-400 hover:bg-emerald/10 hover:text-emerald transition-colors">
+          <a href="/dashboard/search" className="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-slate-400 hover:bg-emerald/10 hover:text-emerald transition-colors">
             <i className="fa-solid fa-magnifying-glass w-5 text-center"></i> Buscar Colegios
           </a>
           <a href="#" className="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-slate-400 hover:bg-emerald/10 hover:text-emerald transition-colors">
