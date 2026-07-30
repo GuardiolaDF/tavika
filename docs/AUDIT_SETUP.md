@@ -33,21 +33,31 @@ Este documento detalla la arquitectura del MVP y las instrucciones para desplega
    ```
 
 3. **Variables de Entorno Backend:**
-   Solicitar al desarrollador el archivo `.env.staging` y colocarlo en `/backend`. Debe contener:
-   - `DATABASE_URL` apuntando a Neon Branch (Staging).
+   Solicitar los archivos `.env.development`, `.env.staging` y `.env.production` y colocarlos en `/backend`. Cada archivo debe contener credenciales específicas (ver `.env.example`).
+   - `DATABASE_URL` (Neon)
    - `GOOGLE_CLIENT_ID` y `GOOGLE_CLIENT_SECRET`.
-   - `MERCADOPAGO_ACCESS_TOKEN` (Debe ser un token de prueba `TEST-xxx`).
-   - `AUDIT_MODE=true` (Activa el logging avanzado de peticiones).
+   - `MP_ACCESS_TOKEN` (Debe ser un token de prueba `TEST-xxx` para dev/staging).
+   - `AUDIT_MODE` (Habilitado `true` solo en staging).
 
-4. **Poblar Base de Datos (Seed):**
+4. **Poblar Base de Datos (Seed) - Solo Staging:**
    ```bash
+   # Asegúrate de definir APP_ENV antes de correr si no usas el .bat
+   $env:APP_ENV="staging"
    python seed_staging.py
    ```
    *Este script inyectará usuarios con cargas XSS, colegios, y roles de prueba.*
 
-5. **Iniciar Backend:**
-   ```bash
-   uvicorn main:app --reload --port 8000
+5. **Iniciar Backend en distintos entornos:**
+   Se han creado scripts automáticos para Windows. Desde la raíz del proyecto, ejecuta:
+   - Para Desarrollo: `.\run-dev.bat`
+   - Para Staging/Auditoría: `.\run-staging.bat`
+   - Para Producción: `.\run-production.bat`
+   
+   *Si prefieres hacerlo manual:*
+   ```powershell
+   cd backend
+   $env:APP_ENV="staging"
+   uvicorn main:app --reload
    ```
 
 6. **Configurar Frontend:**

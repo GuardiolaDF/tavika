@@ -4,7 +4,9 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 
-load_dotenv()
+env_name = os.getenv("APP_ENV", "development")
+env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), f".env.{env_name}")
+load_dotenv(env_path)
 
 # Para desarrollo local usamos sqlite si no hay postgres url. Para producción usaremos postgres.
 # Railway te dará una variable llamada DATABASE_URL

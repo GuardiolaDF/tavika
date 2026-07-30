@@ -3,6 +3,11 @@ import sys
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from database.models import Base, Usuario, Colegio, Campana
+from dotenv import load_dotenv
+
+env_name = os.getenv("APP_ENV", "development")
+env_path = os.path.join(os.path.dirname(__file__), f".env.{env_name}")
+load_dotenv(env_path)
 
 # Asegurar que estamos usando la BD de staging
 database_url = os.environ.get("DATABASE_URL")
