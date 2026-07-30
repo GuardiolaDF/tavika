@@ -5,7 +5,6 @@ from database.models import Usuario, Campana, Postulacion, Colegio
 import os
 import uuid
 from typing import List, Optional
-from worker import send_campaign_emails
 
 router = APIRouter()
 
@@ -114,8 +113,8 @@ def create_campaign(data: dict, db: Session = Depends(get_db)):
         db.add(post)
         
     db.commit()
-    # Despachar la tarea a Celery para que se procese en segundo plano
-    send_campaign_emails.delay(campana.id)
+    # La campaña y postulaciones ya están creadas con estado "pendiente".
+    # El worker asíncrono (tasks.py) las recogerá automáticamente de la base de datos.
     
     return {"message": "Campaña iniciada", "campana_id": campana.id}
 

@@ -35,8 +35,15 @@ try:
         conn.commit()
 except Exception as e:
     pass
+import asyncio
+from tasks import process_pending_emails
 
 app = FastAPI(title="Távika API")
+
+@app.on_event("startup")
+async def startup_event():
+    # Iniciar la cola de envíos asíncrona como una tarea de fondo en el Event Loop
+    asyncio.create_task(process_pending_emails())
 
 # OAuth requiere session middleware
 # Usamos same_site="lax" y https_only=True porque Google hace un redirect de vuelta (cross-site GET)
