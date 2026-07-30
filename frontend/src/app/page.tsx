@@ -230,7 +230,12 @@ export default function Home() {
                     try {
                       const rawUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
                       const apiUrl = rawUrl.endsWith('/') ? rawUrl.slice(0, -1) : rawUrl;
-                      const res = await fetch(`${apiUrl}/api/payments/create_preference`, { method: 'POST' });
+                      const res = await fetch(`${apiUrl}/api/payments/create_preference`, { 
+                        method: 'POST',
+                        headers: {
+                          'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        }
+                      });
                       const data = await res.json();
                       if (data.init_point) {
                         window.location.href = data.init_point;

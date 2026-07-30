@@ -19,7 +19,10 @@ export default function ProfilePage() {
   useEffect(() => {
     const email = localStorage.getItem("email");
     if (email) {
-      fetch(`${apiUrl}/api/campaigns/profile?email=${encodeURIComponent(email)}`)
+      const token = localStorage.getItem('token');
+      fetch(`${apiUrl}/api/campaigns/profile`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
         .then(res => {
           if (!res.ok) throw new Error("No profile");
           return res.json();
@@ -66,6 +69,7 @@ export default function ProfilePage() {
       
       const res = await fetch(`${apiUrl}/api/campaigns/profile`, {
         method: "POST",
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
         body: formData
       });
       

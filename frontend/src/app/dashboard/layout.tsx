@@ -81,8 +81,10 @@ export default function DashboardLayout({
                     const apiUrl = rawUrl.endsWith('/') ? rawUrl.slice(0, -1) : rawUrl;
                     const res = await fetch(`${apiUrl}/api/payments/create_preference`, { 
                       method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ email: email })
+                      headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                      }
                     });
                     const data = await res.json();
                     if (data.init_point) {

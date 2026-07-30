@@ -8,6 +8,7 @@ import urllib.parse
 from database.database import get_db
 from database.models import Usuario
 from sqlalchemy.orm import Session
+from core.security import create_access_token, encrypt_data
 
 router = APIRouter()
 
@@ -57,19 +58,22 @@ async def auth_callback(request: Request, db: Session = Depends(get_db)):
             user = Usuario(email=user_info.email, nombre=user_info.get("name", ""))
             db.add(user)
         if token.get('refresh_token'):
-            user.gmail_token = token.get('refresh_token')
+            user.gmail_token = encrypt_data(token.get('refresh_token'))
         db.commit()
         
         # Extraer imagen y encodearla
         picture_url = urllib.parse.quote(user_info.get('picture', ''))
         
+        # Crear JWT propio de Távika
+        jwt_token = create_access_token({"sub": user.email, "is_admin": user.is_admin})
+        
         # Redirigir al frontend
         frontend_url = os.getenv("FRONTEND_URL", "https://tavika.up.railway.app").rstrip("/")
         
         if user_info['email'] == "tavika.app@gmail.com":
-            return RedirectResponse(url=f"{frontend_url}/admin?login=success&token={token.get('access_token')}&email={user_info['email']}&picture={picture_url}")
+            return RedirectResponse(url=f"{frontend_url}/admin?login=success&token={jwt_token}&email={user_info['email']}&picture={picture_url}")
         else:
-            return RedirectResponse(url=f"{frontend_url}/dashboard?login=success&token={token.get('access_token')}&email={user_info['email']}&picture={picture_url}")
+            return RedirectResponse(url=f"{frontend_url}/dashboard?login=success&token={jwt_token}&email={user_info['email']}&picture={picture_url}")
         
     except Exception as e:
         debug_info = {

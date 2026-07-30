@@ -10,7 +10,10 @@ export default function CampaignsPage() {
   useEffect(() => {
     const email = localStorage.getItem("email");
     if (email) {
-      fetch(`${apiUrl}/api/campaigns/list?email=${encodeURIComponent(email)}`)
+      const token = localStorage.getItem('token');
+      fetch(`${apiUrl}/api/campaigns/list`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
         .then(res => res.json())
         .then(data => {
           setCampaigns(data.campanas || []);

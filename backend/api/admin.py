@@ -3,6 +3,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from database.database import get_db
 from database.models import Colegio, Configuracion, Usuario, Campana, Postulacion
+from core.security import get_admin_user_jwt
 from pydantic import BaseModel
 import requests
 import json
@@ -10,26 +11,8 @@ import json
 router = APIRouter()
 security = HTTPBearer()
 
-def get_admin_user(credentials: HTTPAuthorizationCredentials = Security(security)):
-    token = credentials.credentials
-    # Validar el token contra Google
-    google_url = f"https://www.googleapis.com/oauth2/v1/userinfo?access_token={token}"
-    response = requests.get(google_url)
-    
-    if response.status_code != 200:
-        raise HTTPException(status_code=401, detail="Token inválido o expirado")
-        
-    user_data = response.json()
-    email = user_data.get("email")
-    
-    # MASTER ACCESS LOCK
-    if email != "tavika.app@gmail.com":
-        raise HTTPException(status_code=403, detail="Acceso denegado. No eres administrador.")
-    
-    return email
-
 @router.get("/stats")
-def get_stats(db: Session = Depends(get_db), admin: str = Depends(get_admin_user)):
+def get_stats(db: Session = Depends(get_db), admin: Usuario = Depends(get_admin_user_jwt)):
     total = db.query(Colegio).count()
     con_mail = db.query(Colegio).filter(Colegio.email.isnot(None)).count()
     sin_mail = db.query(Colegio).filter(Colegio.email.is_(None)).count()
@@ -105,8 +88,8 @@ def get_niveles(db: Session = Depends(get_db)):
     niveles = db.query(Colegio.nivel).filter(Colegio.nivel.isnot(None)).distinct().order_by(Colegio.nivel).all()
     return [n[0] for n in niveles if n[0]]
 
-@router.post("/limpiar_rebotes")
-def clean_bounced_emails(db: Session = Depends(get_db), admin: str = Depends(get_admin_user)):
+@router.post("/clean_bounced")
+def clean_bounced_emails(db: Session = Depends(get_db), admin: Usuario = Depends(get_admin_user_jwt)):
     """ Endpoint que dispara el 'cazador' para buscar nuevos emails para colegios con estado=rebotado """
     # Acá encolaríamos la tarea en Celery para el email_hunter
     return {"message": "Limpieza de base de datos encolada. El cazador de correos iniciará pronto."}
@@ -116,7 +99,7 @@ class TemplateUpdate(BaseModel):
     cuerpo: str
 
 @router.get("/template")
-def get_template(db: Session = Depends(get_db), admin: str = Depends(get_admin_user)):
+def get_template(db: Session = Depends(get_db), admin: Usuario = Depends(get_admin_user_jwt)):
     conf = db.query(Configuracion).filter(Configuracion.clave == "global_template").first()
     if not conf:
         asunto = "Propuesta de valor y colaboración - {{nombre_colegio}}"
@@ -136,7 +119,7 @@ Fabián"""
     return json.loads(conf.valor)
 
 @router.post("/template")
-def update_template(data: TemplateUpdate, db: Session = Depends(get_db), admin: str = Depends(get_admin_user)):
+def update_template(data: TemplateUpdate, db: Session = Depends(get_db), admin: Usuario = Depends(get_admin_user_jwt)):
     conf = db.query(Configuracion).filter(Configuracion.clave == "global_template").first()
     valor_json = json.dumps({"asunto": data.asunto, "cuerpo": data.cuerpo})
     if not conf:
@@ -148,7 +131,7 @@ def update_template(data: TemplateUpdate, db: Session = Depends(get_db), admin: 
     return {"message": "Plantilla guardada exitosamente"}
 
 @router.get("/system_stats")
-def get_system_stats(db: Session = Depends(get_db), admin: str = Depends(get_admin_user)):
+def get_system_stats(db: Session = Depends(get_db), admin: Usuario = Depends(get_admin_user_jwt)):
     total_usuarios = db.query(Usuario).count()
     usuarios_pro = db.query(Usuario).filter(Usuario.plan == "pro").count()
     total_campanas = db.query(Campana).count()

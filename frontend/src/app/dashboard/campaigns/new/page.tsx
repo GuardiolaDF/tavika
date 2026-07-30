@@ -38,7 +38,10 @@ export default function NewCampaign() {
     // Load initial data
     const email = localStorage.getItem("email");
     if (email) {
-      fetch(`${apiUrl}/api/campaigns/profile?email=${encodeURIComponent(email)}`)
+      const token = localStorage.getItem('token');
+      fetch(`${apiUrl}/api/campaigns/profile`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
         .then(res => res.json())
         .then(data => {
           setPerfil({
@@ -138,7 +141,8 @@ export default function NewCampaign() {
       
       const res = await fetch(`${apiUrl}/api/campaigns/profile`, {
         method: "POST",
-        body: formData
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        body: formData,
       });
       
       if (res.ok) {
@@ -188,9 +192,11 @@ export default function NewCampaign() {
     try {
       const res = await fetch(`${apiUrl}/api/campaigns/create`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem('token')}`
+        },
         body: JSON.stringify({
-          email: localStorage.getItem("email"),
           asunto: template.asunto,
           cuerpo: template.cuerpo,
           colegios: selectedIds,

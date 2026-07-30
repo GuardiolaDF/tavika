@@ -5,6 +5,8 @@ import os
 import os
 from database.database import SessionLocal
 from database.models import Usuario
+from fastapi import Depends
+from core.security import get_current_user_jwt
 
 router = APIRouter()
 
@@ -14,10 +16,9 @@ MP_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN", "TEST-dummy-token")
 sdk = mercadopago.SDK(MP_ACCESS_TOKEN)
 
 @router.post("/create_preference")
-async def create_preference(request: Request):
+async def create_preference(user: Usuario = Depends(get_current_user_jwt)):
     """ Crea el link de pago para la suscripción """
-    data = await request.json()
-    email = data.get("email")
+    email = user.email
     preference_data = {
         "items": [
             {

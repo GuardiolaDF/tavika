@@ -2,30 +2,31 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from database.database import get_db
 from database.models import Usuario, Campana, Postulacion, Colegio
+from core.security import get_current_user_jwt
 import os
 import uuid
 from typing import List, Optional
+from pydantic import BaseModel, conlist
+
+class CampaignCreate(BaseModel):
+    nombre: str = "Campaña"
+    asunto: str
+    cuerpo: str
+    colegios: conlist(int, min_length=1)
 
 router = APIRouter()
 
-def get_current_user(email: str, db: Session):
-    user = db.query(Usuario).filter(Usuario.email == email).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="Usuario no encontrado")
-    return user
-
 @router.post("/profile")
 async def update_profile(
-    email: str = Form(...),
     nombre: str = Form(""),
     area_estudios: str = Form(""),
     telefono: str = Form(""),
     asunto: str = Form(""),
     cuerpo: str = Form(""),
     cv: Optional[UploadFile] = File(None),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user: Usuario = Depends(get_current_user_jwt)
 ):
-    user = get_current_user(email, db)
     
     user.nombre = nombre
     user.area_estudios = area_estudios
@@ -58,8 +59,7 @@ async def update_profile(
     return {"message": "Perfil actualizado con éxito"}
 
 @router.get("/profile")
-def get_profile(email: str, db: Session = Depends(get_db)):
-    user = get_current_user(email, db)
+def get_profile(user: Usuario = Depends(get_current_user_jwt)):
     return {
         "nombre": user.nombre or "",
         "area_estudios": user.area_estudios or "",
@@ -72,14 +72,11 @@ def get_profile(email: str, db: Session = Depends(get_db)):
     }
 
 @router.post("/create")
-def create_campaign(data: dict, db: Session = Depends(get_db)):
-    email = data.get("email")
-    asunto = data.get("asunto")
-    cuerpo = data.get("cuerpo")
-    colegios_ids = data.get("colegios", [])
-    nombre = data.get("nombre", "Campaña")
-    
-    user = get_current_user(email, db)
+def create_campaign(data: CampaignCreate, db: Session = Depends(get_db), user: Usuario = Depends(get_current_user_jwt)):
+    asunto = data.asunto
+    cuerpo = data.cuerpo
+    colegios_ids = data.colegios
+    nombre = data.nombre
     
     if not colegios_ids:
         raise HTTPException(status_code=400, detail="Debes seleccionar al menos un colegio")
@@ -119,8 +116,7 @@ def create_campaign(data: dict, db: Session = Depends(get_db)):
     return {"message": "Campaña iniciada", "campana_id": campana.id}
 
 @router.get("/list")
-def list_campaigns(email: str, db: Session = Depends(get_db)):
-    user = get_current_user(email, db)
+def list_campaigns(db: Session = Depends(get_db), user: Usuario = Depends(get_current_user_jwt)):
     campanas = db.query(Campana).filter(Campana.propietario_id == user.id).order_by(Campana.id.desc()).all()
     
     res = []

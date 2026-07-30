@@ -1,4 +1,4 @@
-import asyncio
+import time
 import os
 import base64
 import datetime
@@ -9,19 +9,20 @@ from googleapiclient.discovery import build
 from database.database import SessionLocal
 from database.models import Campana, Postulacion, Usuario, Colegio
 
-async def process_pending_emails():
+from core.security import decrypt_data
+
+def process_pending_emails():
     """
     Bucle en segundo plano que revisa la base de datos buscando postulaciones pendientes
     y las envía una por una respetando los límites de tiempo.
     """
-    print("🤖 Cola de envíos asíncrona iniciada. Esperando correos...")
+    print("🤖 Cola de envíos iniciada en hilo secundario. Esperando correos...")
     
     while True:
         db = SessionLocal()
         try:
-            # Buscar una postulación pendiente
-            # Usamos un order_by para procesar en orden de llegada (FIFO)
-            post = db.query(Postulacion).filter(Postulacion.estado == "pendiente").order_by(Postulacion.id.asc()).first()
+            # Buscar una postulación pendiente con bloqueo (FOR UPDATE SKIP LOCKED) para concurrencia
+            post = db.query(Postulacion).filter(Postulacion.estado == "pendiente").order_by(Postulacion.id.asc()).with_for_update(skip_locked=True).first()
             
             if post:
                 campana = db.query(Campana).filter(Campana.id == post.campana_id).first()
@@ -37,8 +38,9 @@ async def process_pending_emails():
 
                 if envios_ultimas_24h >= 400:
                     print(f"⚠️ Usuario {usuario.email} llegó al límite de 400 correos diarios. Pausando sus envíos.")
-                    await asyncio.sleep(60) # Esperar un minuto antes de revisar otras postulaciones
+                    db.rollback() # liberar el candado
                     db.close()
+                    time.sleep(60) # Esperar un minuto antes de revisar otras postulaciones
                     continue
                 
                 colegio = db.query(Colegio).filter(Colegio.id == post.colegio_id).first()
@@ -53,10 +55,14 @@ async def process_pending_emails():
                 print(f"📧 Procesando envío {post.id} de campaña {campana.id} (Usuario: {usuario.email} -> {colegio.email})")
                 
                 try:
-                    # Configurar credenciales usando el refresh_token
+                    # Configurar credenciales desencriptando el refresh_token
+                    raw_token = decrypt_data(usuario.gmail_token)
+                    if not raw_token:
+                        raise Exception("El usuario no tiene token de Gmail válido o no pudo ser desencriptado")
+                    
                     creds = Credentials(
                         token=None,
-                        refresh_token=usuario.gmail_token,
+                        refresh_token=raw_token,
                         token_uri="https://oauth2.googleapis.com/token",
                         client_id=os.getenv("GOOGLE_CLIENT_ID"),
                         client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
@@ -107,7 +113,7 @@ async def process_pending_emails():
                     db.commit()
                     
                     # Pausa de protección anti-spam entre cada correo exitoso
-                    await asyncio.sleep(25)
+                    time.sleep(25)
                     
                 except Exception as mail_error:
                     print(f"❌ Error al enviar correo a {colegio.email}: {mail_error}")
@@ -115,7 +121,7 @@ async def process_pending_emails():
                     post.fecha_envio = datetime.datetime.utcnow()
                     db.commit()
                     # Si falla por un rebote, dormimos un poco menos
-                    await asyncio.sleep(5)
+                    time.sleep(5)
                 
                 # Revisar si quedan más pendientes en esta campaña
                 pendientes = db.query(Postulacion).filter(
@@ -130,12 +136,12 @@ async def process_pending_emails():
                     
             else:
                 # Si no hay nada pendiente, dormir 15 segundos antes de volver a buscar
-                await asyncio.sleep(15)
+                time.sleep(15)
                 
         except Exception as e:
             print(f"❌ Error en el procesador de correos: {e}")
             traceback.print_exc()
             db.rollback()
-            await asyncio.sleep(15) # Pausa por error para evitar bucles infinitos agresivos
+            time.sleep(15) # Pausa por error para evitar bucles infinitos agresivos
         finally:
             db.close()
