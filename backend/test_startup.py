@@ -1,5 +1,9 @@
 import os
-os.environ["DATABASE_URL"] = "postgresql://neondb_owner:npg_Xva2JdEZ5QKF@ep-lively-breeze-aut057ir.c-10.us-east-1.aws.neon.tech/neondb?sslmode=require"
+from dotenv import load_dotenv
+
+load_dotenv()
+if "DATABASE_URL" not in os.environ:
+    os.environ["DATABASE_URL"] = os.getenv("TEST_DATABASE_URL", "sqlite:///./sql_app.db")
 
 try:
     from database.database import engine
