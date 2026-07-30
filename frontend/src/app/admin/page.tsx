@@ -326,8 +326,9 @@ export default function AdminPanel() {
                   {nivelesOpt.map(n => <option key={n} value={n}>{n}</option>)}
                 </select>
               </div>
-              
-              <div className="overflow-x-auto">
+            </div>
+            
+            <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm whitespace-nowrap">
                   <thead>
                     <tr className="text-slate-400 bg-paper border-b border-line">
