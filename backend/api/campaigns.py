@@ -3,9 +3,9 @@ from sqlalchemy.orm import Session
 from database.database import get_db
 from database.models import Usuario, Campana, Postulacion, Colegio
 import os
-import shutil
 import uuid
 from typing import List, Optional
+from worker import send_campaign_emails
 
 router = APIRouter()
 
@@ -112,8 +112,9 @@ def create_campaign(data: dict, db: Session = Depends(get_db)):
         db.add(post)
         
     db.commit()
+    # Despachar la tarea a Celery para que se procese en segundo plano
+    send_campaign_emails.delay(campana.id)
     
-    # Aquí en el futuro se llamará a Celery para que procese el envío asíncrono
     return {"message": "Campaña iniciada", "campana_id": campana.id}
 
 @router.get("/list")
