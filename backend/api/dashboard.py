@@ -13,9 +13,9 @@ def get_dashboard_stats(db: Session = Depends(get_db)):
     # Simulación de datos por ahora, hasta que conectemos el current_user real
     # current_user = Depends(get_current_user)
     
-    # Total de colegios sanos en la base global
+    # Total de colegios privados en la base global
     from database.models import Colegio
-    colegios_totales = db.query(Colegio).count()
+    colegios_totales = db.query(Colegio).filter(Colegio.sector.ilike("%privado%")).count()
         
     # Fake stats de campañas del usuario
     stats = {

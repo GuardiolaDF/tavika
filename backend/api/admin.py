@@ -13,11 +13,15 @@ security = HTTPBearer()
 
 @router.get("/stats")
 def get_stats(db: Session = Depends(get_db), admin: Usuario = Depends(get_admin_user_jwt)):
-    total = db.query(Colegio).count()
-    con_mail = db.query(Colegio).filter(Colegio.email.isnot(None)).count()
-    sin_mail = db.query(Colegio).filter(Colegio.email.is_(None)).count()
-    verificados = db.query(Colegio).filter(Colegio.estado == "verificado").count()
-    rebotados = db.query(Colegio).filter(Colegio.estado == "roto").count()
+    # Filtrar SIEMPRE por sector privado
+    base_query = db.query(Colegio).filter(Colegio.sector.ilike("%privado%"))
+    
+    total = base_query.count()
+    con_mail = base_query.filter(Colegio.email.isnot(None)).count()
+    sin_mail = base_query.filter(Colegio.email.is_(None)).count()
+    verificados = base_query.filter(Colegio.email.isnot(None), Colegio.estado == "sano").count()
+    rebotados = base_query.filter(Colegio.estado == "rebotado").count()
+    
     return {
         "total": total,
         "con_mail": con_mail,

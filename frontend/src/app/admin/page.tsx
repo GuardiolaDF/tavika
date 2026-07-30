@@ -7,12 +7,15 @@ export default function AdminPanel() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("db");
+  const [menuOpen, setMenuOpen] = useState(false);
   
   const [token, setToken] = useState<string | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
+  const [picture, setPicture] = useState<string | null>(null);
 
   const [colegios, setColegios] = useState<any[]>([]);
   const [dbStats, setDbStats] = useState({ total: 0, con_mail: 0, sin_mail: 0, verificados: 0, rebotados: 0 });
-  const [filters, setFilters] = useState({ estado: "", provincia: "", ciudad: "", distrito: "", nivel: "" });
+  const [filters, setFilters] = useState({ estado: "", provincia: "", ciudad: "", distrito: "", nivel: "", q: "" });
   const [skip, setSkip] = useState(0);
   const [hasMore, setHasMore] = useState(true);
 
@@ -60,7 +63,14 @@ export default function AdminPanel() {
       return;
     }
     setToken(localToken);
+    setEmail(localEmail);
+    setPicture(localStorage.getItem("picture"));
   }, []);
+
+  const handleLogout = () => {
+    localStorage.clear();
+    window.location.href = "/";
+  };
 
   useEffect(() => {
     if (token) {
@@ -105,6 +115,7 @@ export default function AdminPanel() {
     try {
       setLoading(true);
       let query = `?limit=50&skip=${currentSkip}&admin_view=true`;
+      if (currentFilters.q) query += `&q=${encodeURIComponent(currentFilters.q)}`;
       if (currentFilters.estado) query += `&estado=${encodeURIComponent(currentFilters.estado)}`;
       if (currentFilters.provincia) query += `&provincia=${encodeURIComponent(currentFilters.provincia)}`;
       if (currentFilters.ciudad) query += `&ciudad=${encodeURIComponent(currentFilters.ciudad)}`;
@@ -190,8 +201,54 @@ export default function AdminPanel() {
     <div className="bg-surface text-slate-800 min-h-screen p-8 font-sans">
       <div className="max-w-7xl mx-auto">
         <header className="mb-8 border-b border-line pb-6">
-          <h1 className="text-3xl font-bold text-ink">Centro de Comando ⚡</h1>
-          <p className="text-slate-500">Solo visible para Master Admin (tavika.app@gmail.com)</p>
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-3xl font-bold text-ink">Centro de Comando ⚡</h1>
+              <p className="text-slate-500">Solo visible para Master Admin (tavika.app@gmail.com)</p>
+            </div>
+            
+            {/* User Dropdown */}
+            <div className="relative z-50">
+              <button 
+                onClick={() => setMenuOpen(!menuOpen)}
+                className="flex items-center gap-2 bg-white border border-line hover:bg-slate-50 rounded-xl p-1.5 pr-4 transition-all cursor-pointer"
+              >
+                {picture ? (
+                  <img src={picture} alt="Profile" className="w-8 h-8 rounded-lg object-cover" />
+                ) : (
+                  <div className="w-8 h-8 rounded-lg bg-emerald/10 text-emerald flex items-center justify-center">
+                    <i className="fa-solid fa-user"></i>
+                  </div>
+                )}
+                <div className="flex flex-col items-start">
+                  <span className="text-sm font-bold text-ink leading-tight">{email?.split("@")[0]}</span>
+                  <span className="text-xs text-slate-400 leading-tight">Admin <i className="fa-solid fa-chevron-down ml-1 text-[10px]"></i></span>
+                </div>
+              </button>
+
+              {/* Dropdown Menu */}
+              {menuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-lg border border-line py-2 z-50 animate-fade-in">
+                  <div className="px-4 py-2 border-b border-line mb-2">
+                    <p className="text-sm font-bold text-ink truncate">{email}</p>
+                    <p className="text-xs text-slate-500">Master Admin</p>
+                  </div>
+                  <button 
+                    onClick={() => { window.location.href = "/dashboard"; }}
+                    className="w-full text-left px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-emerald transition-colors"
+                  >
+                    <i className="fa-solid fa-house w-5 text-center mr-1"></i> Ir al Dashboard
+                  </button>
+                  <button 
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors"
+                  >
+                    <i className="fa-solid fa-arrow-right-from-bracket w-5 text-center mr-1"></i> Cerrar Sesión
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
           
           <div className="flex gap-4 mt-6">
             <button onClick={() => setActiveTab("db")} className={`px-5 py-2.5 rounded-xl font-medium transition-colors ${activeTab === "db" ? "bg-emerald text-white" : "bg-paper border border-line hover:bg-slate-50"}`}>
@@ -208,35 +265,50 @@ export default function AdminPanel() {
 
         {activeTab === "db" && (
           <div className="animate-fade-in space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
               <div className="bg-paper p-6 rounded-2xl border border-line">
                 <h3 className="text-slate-500 text-xs font-semibold uppercase mb-2">Colegios Totales</h3>
                 <p className="text-3xl font-bold text-ink">{dbStats.total.toLocaleString()}</p>
               </div>
-              <div className="bg-paper p-6 rounded-2xl border border-emerald/30">
-                <h3 className="text-emerald text-xs font-semibold uppercase mb-2">Con Mail (Existentes)</h3>
-                <p className="text-3xl font-bold text-emerald">{dbStats.con_mail.toLocaleString()}</p>
+              <div className="bg-paper p-6 rounded-2xl border border-blue-500/30">
+                <h3 className="text-blue-500 text-xs font-semibold uppercase mb-2">Con Mail (Existentes)</h3>
+                <p className="text-3xl font-bold text-blue-500">{dbStats.con_mail.toLocaleString()}</p>
               </div>
               <div className="bg-paper p-6 rounded-2xl border border-amber/30">
                 <h3 className="text-amber-600 text-xs font-semibold uppercase mb-2">Sin Mail (Faltantes)</h3>
                 <p className="text-3xl font-bold text-amber-600">{dbStats.sin_mail.toLocaleString()}</p>
               </div>
-              <div className="bg-paper p-6 rounded-2xl border border-blue-500/30">
-                <h3 className="text-blue-500 text-xs font-semibold uppercase mb-2">Mails Verificados</h3>
-                <p className="text-3xl font-bold text-blue-500">{dbStats.verificados.toLocaleString()}</p>
+              <div className="bg-paper p-6 rounded-2xl border border-emerald/30">
+                <h3 className="text-emerald text-xs font-semibold uppercase mb-2">Mails Verificados</h3>
+                <p className="text-3xl font-bold text-emerald">{dbStats.verificados.toLocaleString()}</p>
+              </div>
+              <div className="bg-paper p-6 rounded-2xl border border-red-500/30">
+                <h3 className="text-red-500 text-xs font-semibold uppercase mb-2">Mails Rebotados</h3>
+                <p className="text-3xl font-bold text-red-500">{dbStats.rebotados.toLocaleString()}</p>
               </div>
             </div>
 
             <div className="bg-paper rounded-2xl border border-line overflow-hidden">
-              <div className="p-5 border-b border-line bg-slate-50 flex flex-wrap gap-4 items-center">
-                <span className="font-semibold text-ink w-full md:w-auto">Filtros:</span>
-                <select name="estado" value={filters.estado} onChange={handleFilterChange} className="border border-line rounded-lg px-3 py-1.5 text-sm bg-white outline-none flex-1 min-w-[150px]">
-                  <option value="">Todos los Estados</option>
-                  <option value="con_mail">Con Mail (Existentes)</option>
-                  <option value="sin_mail">Sin Mail (Faltantes)</option>
-                  <option value="verificado">Verificados</option>
-                  <option value="roto">Rebotados (Rotos)</option>
-                </select>
+              <div className="p-5 border-b border-line bg-slate-50 flex flex-col gap-4">
+                <div className="w-full">
+                  <input
+                    type="text"
+                    name="q"
+                    value={filters.q}
+                    onChange={handleFilterChange}
+                    placeholder="Buscar colegio por nombre (ej. Sarmiento)..."
+                    className="w-full border border-line rounded-xl px-4 py-3 text-sm bg-white outline-none focus:ring-2 focus:ring-emerald/20 focus:border-emerald transition-all placeholder-slate-400"
+                  />
+                </div>
+                <div className="flex flex-wrap gap-4 items-center">
+                  <span className="font-semibold text-ink w-full md:w-auto">Filtros:</span>
+                  <select name="estado" value={filters.estado} onChange={handleFilterChange} className="border border-line rounded-lg px-3 py-1.5 text-sm bg-white outline-none flex-1 min-w-[150px]">
+                    <option value="">Todos los Estados</option>
+                    <option value="con_mail">Con Mail (Existentes)</option>
+                    <option value="sin_mail">Sin Mail (Faltantes)</option>
+                    <option value="sano">Verificados</option>
+                    <option value="rebotado">Rebotados</option>
+                  </select>
                 <select name="provincia" value={filters.provincia} onChange={handleFilterChange} className="border border-line rounded-lg px-3 py-1.5 text-sm bg-white outline-none flex-1 min-w-[150px]">
                   <option value="">Todas las Provincias</option>
                   {provinciasOpt.map(p => <option key={p} value={p}>{p}</option>)}
@@ -274,14 +346,14 @@ export default function AdminPanel() {
                         <td className="p-4 text-slate-500">{col.nivel}</td>
                         <td className="p-4 text-slate-500">{col.email || "Sin email"}</td>
                         <td className="p-4 min-w-[120px]">
-                          {col.estado === "verificado" ? (
+                          {col.estado === "verificado" || col.estado === "sano" && col.email ? (
                             <span className="bg-emerald/10 text-emerald px-2.5 py-1 rounded-full text-xs font-bold tracking-wide">VERIFICADO</span>
-                          ) : col.estado === "roto" ? (
+                          ) : col.estado === "rebotado" ? (
                             <span className="bg-red-500/10 text-red-500 px-2.5 py-1 rounded-full text-xs font-bold tracking-wide">REBOTADO</span>
                           ) : col.email ? (
-                            <span className="bg-blue-500/10 text-blue-500 px-2.5 py-1 rounded-full text-xs font-bold tracking-wide">PENDIENTE</span>
+                            <span className="bg-blue-500/10 text-blue-500 px-2.5 py-1 rounded-full text-xs font-bold tracking-wide">EXISTENTE</span>
                           ) : (
-                            <span className="bg-slate-200 text-slate-500 px-2.5 py-1 rounded-full text-xs font-bold tracking-wide">FALTANTE</span>
+                            <span className="bg-amber/10 text-amber-600 px-2.5 py-1 rounded-full text-xs font-bold tracking-wide">FALTANTE</span>
                           )}
                         </td>
                       </tr>

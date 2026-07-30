@@ -106,18 +106,7 @@ export default function SearchPage() {
         <p className="text-slate-500">Explorá nuestra base de datos nacional y prepará tu próxima campaña.</p>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
-        <div className="flex-1 relative">
-          <i className="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-          <input 
-            type="text" 
-            placeholder="Buscar escuela por nombre..." 
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 bg-white border border-line rounded-xl outline-none focus:border-emerald shadow-sm transition-colors"
-          />
-        </div>
-      </div>
+
 
       <div className="bg-paper rounded-2xl border border-line overflow-hidden shadow-sm">
         <div className="p-5 border-b border-line bg-slate-50">
@@ -140,6 +129,17 @@ export default function SearchPage() {
               <option value="">Todos los Niveles</option>
               {nivelesOpt.map(n => <option key={n} value={n}>{n}</option>)}
             </select>
+          </div>
+          
+          <div className="mt-4 relative">
+            <i className="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input 
+              type="text" 
+              placeholder="Buscar colegio por nombre (ej. Sarmiento)..." 
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 bg-white border border-line rounded-xl outline-none focus:border-emerald focus:ring-2 focus:ring-emerald/20 shadow-sm transition-all placeholder-slate-400 text-sm text-ink"
+            />
           </div>
         </div>
         
@@ -175,10 +175,10 @@ export default function SearchPage() {
                         <div className="w-2 h-2 rounded-full bg-emerald"></div>
                         <span className="text-emerald font-semibold">Email Verificado</span>
                       </div>
-                    ) : col.estado === "roto" ? (
+                    ) : col.estado === "rebotado" ? (
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                        <span className="text-red-500 font-semibold">Email Inválido</span>
+                        <span className="text-red-500 font-semibold">Email Rebotado</span>
                       </div>
                     ) : col.email ? (
                       <div className="flex items-center gap-2">
@@ -206,11 +206,11 @@ export default function SearchPage() {
           
           {!loading && colegios.length === 0 && (
             <div className="p-16 text-center">
-              <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i className="fa-solid fa-magnifying-glass text-slate-400 text-xl"></i>
+              <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-100">
+                <i className="fa-solid fa-magnifying-glass text-red-400 text-xl"></i>
               </div>
-              <h3 className="text-lg font-bold text-ink mb-1">No hay resultados</h3>
-              <p className="text-slate-500">Intentá modificar los filtros de búsqueda.</p>
+              <h3 className="text-lg font-bold text-red-500 mb-1">Sin resultados</h3>
+              <p className="text-slate-500">Intentá modificar los filtros de búsqueda o revisar la ortografía.</p>
             </div>
           )}
           

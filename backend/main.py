@@ -4,6 +4,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 import os
 from api import auth, dashboard, admin, payments, campaigns
+from core.audit import AuditLogMiddleware
 from database.database import engine, Base
 from database import models
 from sqlalchemy import text
@@ -68,6 +69,9 @@ app.add_middleware(
 # Fundamental para que FastAPI sepa que está detrás de HTTPS en Railway
 # (Debe ser el ÚLTIMO add_middleware para que se ejecute PRIMERO y modifique los headers para todos)
 app.add_middleware(ProxyHeadersMiddleware, trusted_hosts=["*"])
+
+if os.getenv("AUDIT_MODE") == "true":
+    app.add_middleware(AuditLogMiddleware)
 
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(dashboard.router, prefix="/api/dashboard", tags=["dashboard"])

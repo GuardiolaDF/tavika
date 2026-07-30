@@ -366,7 +366,7 @@ export default function NewCampaign() {
               {targetingLoading ? (
                 <div className="p-8 text-center text-slate-500"><i className="fa-solid fa-spinner fa-spin mr-2"></i>Buscando colegios...</div>
               ) : colegios.length === 0 ? (
-                <div className="p-8 text-center text-slate-500">No hay resultados para estos filtros.</div>
+                <div className="p-8 text-center text-red-500 font-bold">Sin resultados</div>
               ) : (
                 <table className="w-full text-left text-sm">
                   <tbody className="divide-y divide-line">
