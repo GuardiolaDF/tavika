@@ -29,6 +29,12 @@ export default function DashboardLayout({
       window.history.replaceState({}, document.title, window.location.pathname);
     }
     
+    const adminEmail = "tavika.app@gmail.com";
+    if (localStorage.getItem("email") === adminEmail && window.location.pathname === "/dashboard") {
+      window.location.href = "/admin";
+      return;
+    }
+
     setEmail(localStorage.getItem("email"));
     setPicture(localStorage.getItem("picture"));
     setPlan(localStorage.getItem("plan") || "freemium");
@@ -153,7 +159,7 @@ export default function DashboardLayout({
                     <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-lg border border-line py-2 z-50 animate-fade-in">
                       <div className="px-4 py-2 border-b border-line mb-2">
                         <p className="text-sm font-bold text-ink truncate">{email}</p>
-                        <p className="text-xs text-slate-500">Plan Freemium</p>
+                        <p className="text-xs text-slate-500">{email === "tavika.app@gmail.com" ? "Master Admin" : `Plan ${plan === "pro" ? "Pro" : "Freemium"}`}</p>
                       </div>
                       <a href="#" className="block px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-emerald transition-colors">
                         <i className="fa-solid fa-gear w-5 text-center mr-1"></i> Configuración
@@ -179,7 +185,7 @@ export default function DashboardLayout({
               <div className="bg-emerald/10 border border-emerald/20 rounded-xl px-2 md:px-4 py-2 text-sm hidden sm:block">
                 <span className="text-emerald font-bold"><i className="fa-solid fa-crown mr-1"></i> PRO</span>
               </div>
-            ) : mounted ? (
+            ) : mounted && email !== "tavika.app@gmail.com" ? (
               <div className="bg-navy/5 border border-navy/15 rounded-xl px-2 md:px-4 py-2 text-sm hidden sm:block">
                 <span className="text-slate-500 hidden md:inline">Plan:</span>
                 <span className="font-semibold text-ink ml-1">Freemium</span>

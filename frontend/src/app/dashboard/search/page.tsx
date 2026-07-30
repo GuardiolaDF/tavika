@@ -170,26 +170,14 @@ export default function SearchPage() {
                     </span>
                   </td>
                   <td className="p-5">
-                    {col.estado === "verificado" ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-emerald"></div>
-                        <span className="text-emerald font-semibold">Email Verificado</span>
-                      </div>
+                    {col.estado === "verificado" || col.estado === "sano" && col.email ? (
+                      <span className="bg-emerald/10 text-emerald px-2.5 py-1 rounded-full text-xs font-bold tracking-wide">VERIFICADO</span>
                     ) : col.estado === "rebotado" ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                        <span className="text-red-500 font-semibold">Email Rebotado</span>
-                      </div>
+                      <span className="bg-red-500/10 text-red-500 px-2.5 py-1 rounded-full text-xs font-bold tracking-wide">REBOTADO</span>
                     ) : col.email ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                        <span className="text-blue-500 font-semibold">Email Disponible</span>
-                      </div>
+                      <span className="bg-blue-500/10 text-blue-500 px-2.5 py-1 rounded-full text-xs font-bold tracking-wide">EXISTENTE</span>
                     ) : (
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                        <span className="text-amber-600 font-semibold">Email Faltante</span>
-                      </div>
+                      <span className="bg-amber/10 text-amber-600 px-2.5 py-1 rounded-full text-xs font-bold tracking-wide">FALTANTE</span>
                     )}
                   </td>
                 </tr>
