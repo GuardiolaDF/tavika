@@ -11,6 +11,7 @@ export default function DashboardLayout({
   const [picture, setPicture] = useState<string | null>(null);
   const [plan, setPlan] = useState<string>("pro"); // default to prevent flicker if pro
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
 
@@ -41,10 +42,22 @@ export default function DashboardLayout({
 
   return (
     <div className="bg-surface text-slate-800 flex min-h-screen">
+      
+      {/* Mobile Overlay */}
+      {mobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-ink/50 z-40 md:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        ></div>
+      )}
+
       {/* SIDEBAR */}
-      <aside className="w-64 min-h-screen bg-ink flex flex-col fixed left-0 top-0 z-40">
-        <div className="px-6 py-5 border-b border-white/10">
+      <aside className={`w-64 min-h-screen bg-ink flex flex-col fixed left-0 top-0 z-50 transition-transform duration-300 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+        <div className="px-6 py-5 border-b border-white/10 flex items-center justify-between">
           <a href="/" className="text-xl font-bold text-white tracking-tight block">Távika<span className="text-emerald">Pro</span></a>
+          <button className="md:hidden text-slate-400 hover:text-white" onClick={() => setMobileMenuOpen(false)}>
+            <i className="fa-solid fa-xmark text-xl"></i>
+          </button>
         </div>
         <nav className="flex-1 px-3 py-6 space-y-1">
           <a href="/dashboard" className={`sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-colors ${pathname === '/dashboard' ? 'bg-emerald/12 text-emerald font-semibold active' : 'text-slate-400 hover:bg-emerald/10 hover:text-emerald'}`}>
@@ -89,12 +102,17 @@ export default function DashboardLayout({
       </aside>
 
       {/* MAIN AREA */}
-      <div className="ml-64 flex-1 flex flex-col min-h-screen">
+      <div className="md:ml-64 flex-1 flex flex-col min-h-screen">
         {/* TOP BAR */}
-        <header className="bg-paper border-b border-line px-8 py-4 flex items-center justify-between sticky top-0 z-30">
-          <div>
-            <h1 className="text-lg font-bold text-ink">Bienvenido 👋</h1>
-            <p className="text-xs text-slate-400">Dashboard Principal</p>
+        <header className="bg-paper border-b border-line px-4 md:px-8 py-4 flex items-center justify-between sticky top-0 z-30">
+          <div className="flex items-center gap-4">
+            <button className="md:hidden text-ink text-xl" onClick={() => setMobileMenuOpen(true)}>
+              <i className="fa-solid fa-bars"></i>
+            </button>
+            <div>
+              <h1 className="text-lg font-bold text-ink">Bienvenido 👋</h1>
+              <p className="text-xs text-slate-400 hidden sm:block">Dashboard Principal</p>
+            </div>
           </div>
           <div className="flex items-center gap-4">
             {email ? (
@@ -152,12 +170,12 @@ export default function DashboardLayout({
               </a>
             )}
             {mounted && plan === "pro" ? (
-              <div className="bg-emerald/10 border border-emerald/20 rounded-xl px-4 py-2 text-sm">
+              <div className="bg-emerald/10 border border-emerald/20 rounded-xl px-2 md:px-4 py-2 text-sm hidden sm:block">
                 <span className="text-emerald font-bold"><i className="fa-solid fa-crown mr-1"></i> PRO</span>
               </div>
             ) : mounted ? (
-              <div className="bg-navy/5 border border-navy/15 rounded-xl px-4 py-2 text-sm">
-                <span className="text-slate-500">Plan:</span>
+              <div className="bg-navy/5 border border-navy/15 rounded-xl px-2 md:px-4 py-2 text-sm hidden sm:block">
+                <span className="text-slate-500 hidden md:inline">Plan:</span>
                 <span className="font-semibold text-ink ml-1">Freemium</span>
               </div>
             ) : null}
@@ -165,7 +183,7 @@ export default function DashboardLayout({
         </header>
 
         {/* CONTENT */}
-        <main className="flex-1 px-8 py-8 space-y-8">
+        <main className="flex-1 px-4 md:px-8 py-6 md:py-8 space-y-8 w-full max-w-full overflow-hidden">
           {children}
         </main>
       </div>
