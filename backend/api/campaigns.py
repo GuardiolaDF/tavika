@@ -43,9 +43,11 @@ async def update_profile(
         if len(content) > 2 * 1024 * 1024:
             raise HTTPException(status_code=400, detail="El PDF no debe pesar más de 2MB")
         
-        # Save file to uploads folder
+        # Save file to uploads folder with friendly name
         os.makedirs("uploads/cvs", exist_ok=True)
-        filename = f"{user.id}_{uuid.uuid4().hex}.pdf"
+        clean_nombre = "".join([c if c.isalnum() else "" for c in (user.nombre or "User")])
+        clean_area = "".join([c if c.isalnum() else "" for c in (user.area_estudios or "Area")])
+        filename = f"CV-{clean_nombre}-{clean_area}-{user.id}.pdf"
         filepath = os.path.join("uploads/cvs", filename)
         
         with open(filepath, "wb") as f:
