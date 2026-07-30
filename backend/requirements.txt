@@ -11,3 +11,7 @@ authlib==1.2.1
 itsdangerous==2.1.2
 httpx==0.25.1
 python-multipart==0.0.6
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
+google-api-python-client
