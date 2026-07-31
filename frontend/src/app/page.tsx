@@ -37,11 +37,11 @@ export default function Home() {
               </a>
             ) : (
               <a href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/auth/login`} className="hidden sm:inline-block text-sm font-medium text-white/70 hover:text-white px-3 py-2 transition-colors">
-                Iniciar Sesión
+                Iniciar sesión
               </a>
             )}
             <Link href="#pricing" className="bg-emerald hover:bg-emeralddeep text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-all duration-300 shadow-md shadow-emerald/20">
-              Probar Gratis
+              Probar gratis
             </Link>
           </div>
         </div>
@@ -66,11 +66,11 @@ export default function Home() {
                 </p>
                 <div className="flex flex-wrap gap-4">
                   <Link href="#pricing" className="bg-emerald hover:bg-emeralddeep text-white text-lg font-semibold px-8 py-4 rounded-xl transition-all duration-300 shadow-xl shadow-emerald/20 flex items-center group">
-                    Probar Gratis
+                    Probar gratis
                     <i className="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
                   </Link>
                   <Link href="#pricing" className="border border-white/20 text-white text-lg font-medium px-8 py-4 rounded-xl hover:bg-white/10 transition-all duration-300">
-                    Ver Planes
+                    Ver planes
                   </Link>
                 </div>
                 <p className="text-sm text-slate-400">Sin tarjeta de crédito · Cancela cuando quieras</p>
@@ -139,14 +139,14 @@ export default function Home() {
               <div className="group p-8 rounded-2xl border border-line hover:border-emerald/40 transition-all duration-300 hover:-translate-y-1">
                 <div className="flex items-center space-x-3 mb-3">
                   <i className="fa-solid fa-shield-heart text-emerald text-xl"></i>
-                  <h3 className="text-xl font-bold text-ink">Base de Datos Curada</h3>
+                  <h3 className="text-xl font-bold text-ink">Base de datos curada</h3>
                 </div>
                 <p className="text-slate-600">Más de 3.000 direcciones verificadas de colegios de Buenos Aires, Córdoba y Mendoza. Actualizada semanalmente.</p>
               </div>
               <div className="group p-8 rounded-2xl border border-line hover:border-emerald/40 transition-all duration-300 hover:-translate-y-1">
                 <div className="flex items-center space-x-3 mb-3">
                   <i className="fa-solid fa-bolt text-blue-600 text-xl"></i>
-                  <h3 className="text-xl font-bold text-ink">Envío Inteligente y Seguro</h3>
+                  <h3 className="text-xl font-bold text-ink">Envío inteligente y seguro</h3>
                 </div>
                 <p className="text-slate-600">Espaciamiento orgánico entre envíos para proteger tu reputación como remitente y evitar spam.</p>
               </div>
@@ -197,7 +197,7 @@ export default function Home() {
             </div>
             <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
               <div className="p-8 rounded-2xl border border-line bg-surface flex flex-col">
-                <h3 className="text-2xl font-bold text-ink">Prueba Gratuita</h3>
+                <h3 className="text-2xl font-bold text-ink">Prueba gratuita</h3>
                 <div className="my-6">
                   <span className="text-5xl font-bold text-ink">$0</span>
                   <span className="text-slate-500">/gratis</span>
@@ -209,12 +209,12 @@ export default function Home() {
                   <li className="flex items-center text-slate-700"><i className="fa-solid fa-check text-emerald mr-3"></i>Filtros básicos</li>
                 </ul>
                 <Link href="/dashboard" className="block w-full py-4 border-2 border-emerald text-emerald font-semibold rounded-xl text-center hover:bg-emerald hover:text-white transition-all">
-                  Empezar Gratis
+                  Empezar gratis
                 </Link>
               </div>
               <div className="p-8 rounded-2xl border-2 border-emerald bg-ink text-white flex flex-col relative overflow-hidden">
                 <div className="absolute top-0 right-0 bg-emerald text-white text-xs font-bold px-4 py-1 rounded-bl-xl">RECOMENDADO</div>
-                <h3 className="text-2xl font-bold">Pase Mensual</h3>
+                <h3 className="text-2xl font-bold">Pase mensual</h3>
                 <div className="my-6">
                   <span className="text-5xl font-bold">$4.999</span>
                   <span className="text-slate-400">/mes</span>
@@ -271,8 +271,8 @@ export default function Home() {
             <p>© 2026 Távika. Todos los derechos reservados.</p>
             <div className="flex gap-4 mt-4 md:mt-0">
               <a href="/privacidad" className="hover:text-white transition-colors">Privacidad</a>
-              <a href="/terminos" className="hover:text-white transition-colors">Términos y Condiciones</a>
-              <a href="/imprint" className="hover:text-white transition-colors">Aviso Legal</a>
+              <a href="/terminos" className="hover:text-white transition-colors">Términos y condiciones</a>
+              <a href="/imprint" className="hover:text-white transition-colors">Aviso legal</a>
             </div>
             <p className="mt-4 md:mt-0">Hecho con <i className="fa-solid fa-heart text-emerald mx-1"></i> para docentes argentinos.</p>
           </div>

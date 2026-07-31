@@ -83,7 +83,7 @@ export default function Dashboard() {
               <span className="text-xs text-slate-600">
                 Declaro bajo juramento que los documentos adjuntos a mi campaña contienen 
                 exclusivamente mis propios datos profesionales, no suplantan la identidad de terceros 
-                y acepto los <a href="/terminos" className="text-navy hover:underline">Términos y Condiciones</a>.
+                y acepto los <a href="/terminos" className="text-navy hover:underline">Términos y condiciones</a>.
               </span>
             </label>
           </div>

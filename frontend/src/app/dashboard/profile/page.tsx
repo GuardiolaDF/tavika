@@ -210,7 +210,7 @@ export default function ProfilePage() {
                 className="mt-1"
               />
               <label htmlFor="terminos" className="text-xs text-slate-600 leading-tight cursor-pointer">
-                Declaro que la información contenida en el CV es verdadera y acepto los términos y condiciones para el envío de Mis datos a los colegios seleccionados mediante la plataforma.
+                Declaro que la información contenida en el CV es verdadera y acepto los Términos y condiciones para el envío de Mis datos a los colegios seleccionados mediante la plataforma.
               </label>
             </div>
           </div>

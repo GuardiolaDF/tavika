@@ -2,7 +2,7 @@ export default function Imprint() {
   return (
     <div className="bg-surface text-slate-800 min-h-screen p-8 lg:p-24">
       <div className="max-w-3xl mx-auto bg-white p-10 rounded-2xl border border-line shadow-sm">
-        <h1 className="text-3xl font-bold text-ink mb-6">Aviso Legal (Imprint)</h1>
+        <h1 className="text-3xl font-bold text-ink mb-6">Aviso legal (Imprint)</h1>
         
         <div className="prose prose-slate max-w-none">
           <p className="mb-4">Información provista de acuerdo a las regulaciones internacionales de comercio electrónico.</p>

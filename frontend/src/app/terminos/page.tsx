@@ -2,7 +2,7 @@ export default function Terminos() {
   return (
     <div className="bg-surface text-slate-800 min-h-screen p-8 lg:p-24">
       <div className="max-w-3xl mx-auto bg-white p-10 rounded-2xl border border-line shadow-sm">
-        <h1 className="text-3xl font-bold text-ink mb-6">Términos y Condiciones</h1>
+        <h1 className="text-3xl font-bold text-ink mb-6">Términos y condiciones</h1>
         
         <div className="prose prose-slate max-w-none">
           <p className="mb-4">Última actualización: 27 de Julio de 2026</p>
