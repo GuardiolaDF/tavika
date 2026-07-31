@@ -10,10 +10,7 @@ export default function CampaignsPage() {
   useEffect(() => {
     const email = localStorage.getItem("email");
     if (email) {
-      const token = localStorage.getItem('token');
-      fetch(`${apiUrl}/api/campaigns/list`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
+      fetch(`${apiUrl}/api/campaigns/list`, { credentials: "include" })
         .then(res => res.json())
         .then(data => {
           setCampaigns(data.campanas || []);
@@ -27,7 +24,7 @@ export default function CampaignsPage() {
     <div className="p-8 max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-ink mb-2">Mis Campañas</h1>
+          <h1 className="text-3xl font-bold text-ink mb-2">Mis campañas</h1>
           <p className="text-slate-500">Monitoreá el progreso de tus postulaciones en tiempo real.</p>
         </div>
         <Link href="/dashboard/campaigns/new" className="bg-emerald text-white px-6 py-3 rounded-xl font-bold hover:bg-emeralddeep transition-all shadow-lg shadow-emerald/20 flex items-center">

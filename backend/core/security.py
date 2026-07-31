@@ -7,8 +7,18 @@ SECRET_KEY = os.getenv("JWT_SECRET_KEY", "super-secret-key-for-local-dev-change-
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7 # 1 week
 
-FERNET_KEY_STR = os.getenv("FERNET_KEY", Fernet.generate_key().decode())
-fernet = Fernet(FERNET_KEY_STR.encode())
+import base64
+import hashlib
+
+raw_key = os.getenv("FERNET_KEY")
+if raw_key:
+    try:
+        fernet = Fernet(raw_key.encode())
+    except ValueError:
+        hashed_key = base64.urlsafe_b64encode(hashlib.sha256(raw_key.encode()).digest())
+        fernet = Fernet(hashed_key)
+else:
+    fernet = Fernet(Fernet.generate_key())
 
 def create_access_token(data: dict):
     to_encode = data.copy()
@@ -37,16 +47,24 @@ def decrypt_data(data: str) -> str:
     except Exception:
         return data # fallback if not encrypted
 
-from fastapi import Depends, HTTPException
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi import Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from database.database import get_db
 from database.models import Usuario
 
-security = HTTPBearer()
-
-def get_current_user_jwt(credentials: HTTPAuthorizationCredentials = Depends(security), db: Session = Depends(get_db)):
-    token = credentials.credentials
+def get_current_user_jwt(request: Request, db: Session = Depends(get_db)):
+    auth_header = request.headers.get("Authorization")
+    cookie_token = request.cookies.get("access_token")
+    
+    token = None
+    if auth_header and auth_header.startswith("Bearer "):
+        token = auth_header.replace("Bearer ", "")
+    elif cookie_token and cookie_token.startswith("Bearer "):
+        token = cookie_token.replace("Bearer ", "")
+        
+    if not token:
+        raise HTTPException(status_code=401, detail="No autenticado")
+        
     payload = decode_access_token(token)
     if not payload:
         raise HTTPException(status_code=401, detail="Token inválido o expirado")
@@ -57,6 +75,6 @@ def get_current_user_jwt(credentials: HTTPAuthorizationCredentials = Depends(sec
     return user
 
 def get_admin_user_jwt(current_user: Usuario = Depends(get_current_user_jwt)):
-    if not current_user.is_admin and current_user.email != "tavika.app@gmail.com":
+    if not current_user.is_admin:
         raise HTTPException(status_code=403, detail="No tienes permisos de administrador")
     return current_user

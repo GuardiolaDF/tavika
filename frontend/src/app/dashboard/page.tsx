@@ -10,7 +10,7 @@ export default function Dashboard() {
   });
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/dashboard/stats`)
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/dashboard/stats`, { credentials: "include" })
       .then(res => res.json())
       .then(data => setStats(data))
       .catch(() => {});
@@ -89,7 +89,7 @@ export default function Dashboard() {
           </div>
 
           <button className="mt-6 bg-emerald text-white px-6 py-2 rounded-xl font-medium hover:bg-emeralddeep transition-colors">
-            Crear Nueva Campaña
+            Crear nueva campaña
           </button>
         </div>
       </div>

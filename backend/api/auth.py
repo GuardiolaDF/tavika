@@ -1,14 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from authlib.integrations.starlette_client import OAuth
 from starlette.config import Config
-from starlette.requests import Request
 from starlette.responses import RedirectResponse
 import os
 import urllib.parse
 from database.database import get_db
 from database.models import Usuario
 from sqlalchemy.orm import Session
-from core.security import create_access_token, encrypt_data
+from core.security import create_access_token, encrypt_data, get_current_user_jwt, ACCESS_TOKEN_EXPIRE_MINUTES
 
 router = APIRouter()
 
@@ -23,15 +22,15 @@ config_data = {
 }
 starlette_config = Config(environ=config_data)
 
+client_kwargs_config = {
+    'scope': 'openid email profile https://www.googleapis.com/auth/gmail.send'
+}
+
 oauth = OAuth(starlette_config)
 oauth.register(
     name='google',
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
-    client_kwargs={
-        # Pedimos scope de email y openid para el login, 
-        # y ademas el scope de GMAIL para enviar correos en nombre del usuario
-        'scope': 'openid email profile https://www.googleapis.com/auth/gmail.send'
-    }
+    client_kwargs=client_kwargs_config
 )
 
 @router.get("/login")
@@ -41,6 +40,7 @@ async def login(request: Request):
     
     # Genera la URL a la que Google redirigirá después de aceptar los permisos
     redirect_uri = request.url_for('auth_callback')
+    
     # Pedimos access_type=offline para que nos de un refresh_token, así Celery puede enviar correos de fondo
     return await oauth.google.authorize_redirect(request, redirect_uri, access_type='offline', prompt='consent')
 
@@ -57,12 +57,14 @@ async def auth_callback(request: Request, db: Session = Depends(get_db)):
         if not user:
             user = Usuario(email=user_info.email, nombre=user_info.get("name", ""))
             db.add(user)
+            db.commit()
+            db.refresh(user)
         if token.get('refresh_token'):
             user.gmail_token = encrypt_data(token.get('refresh_token'))
-        db.commit()
+            db.commit()
         
         # Extraer imagen y encodearla
-        picture_url = urllib.parse.quote(user_info.get('picture', ''))
+        picture_url = user_info.get('picture', '')
         
         # Crear JWT propio de Távika
         jwt_token = create_access_token({"sub": user.email, "is_admin": user.is_admin})
@@ -70,10 +72,23 @@ async def auth_callback(request: Request, db: Session = Depends(get_db)):
         # Redirigir al frontend
         frontend_url = os.getenv("FRONTEND_URL", "https://tavika.up.railway.app").rstrip("/")
         
-        if user_info['email'] == "tavika.app@gmail.com":
-            return RedirectResponse(url=f"{frontend_url}/admin?login=success&token={jwt_token}&email={user_info['email']}&picture={picture_url}")
+        if user.is_admin:
+            response = RedirectResponse(url=f"{frontend_url}/admin")
         else:
-            return RedirectResponse(url=f"{frontend_url}/dashboard?login=success&token={jwt_token}&email={user_info['email']}&picture={picture_url}")
+            response = RedirectResponse(url=f"{frontend_url}/dashboard")
+            
+        is_production = os.getenv("APP_ENV") == "production"
+        
+        response.set_cookie(
+            key="access_token",
+            value=f"Bearer {jwt_token}",
+            httponly=True,
+            secure=is_production,
+            samesite="lax",
+            max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+            path="/"
+        )
+        return response
         
     except Exception as e:
         debug_info = {
@@ -84,3 +99,12 @@ async def auth_callback(request: Request, db: Session = Depends(get_db)):
             "headers": dict(request.headers)
         }
         raise HTTPException(status_code=400, detail=debug_info)
+
+@router.get("/me")
+def get_me(user: Usuario = Depends(get_current_user_jwt)):
+    return {
+        "email": user.email,
+        "nombre": user.nombre,
+        "is_admin": user.is_admin,
+        "plan": user.plan
+    }

@@ -16,7 +16,7 @@ def process_pending_emails():
     Bucle en segundo plano que revisa la base de datos buscando postulaciones pendientes
     y las envía una por una respetando los límites de tiempo.
     """
-    print("🤖 Cola de envíos iniciada en hilo secundario. Esperando correos...")
+    print("[Cola] Cola de envíos iniciada en hilo secundario. Esperando correos...")
     
     while True:
         db = SessionLocal()

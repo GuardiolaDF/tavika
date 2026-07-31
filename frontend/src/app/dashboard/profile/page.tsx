@@ -19,10 +19,7 @@ export default function ProfilePage() {
   useEffect(() => {
     const email = localStorage.getItem("email");
     if (email) {
-      const token = localStorage.getItem('token');
-      fetch(`${apiUrl}/api/campaigns/profile`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
+      fetch(`${apiUrl}/api/campaigns/profile`, { credentials: "include" })
         .then(res => {
           if (!res.ok) throw new Error("No profile");
           return res.json();
@@ -69,7 +66,7 @@ export default function ProfilePage() {
       
       const res = await fetch(`${apiUrl}/api/campaigns/profile`, {
         method: "POST",
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        credentials: "include",
         body: formData
       });
       
@@ -94,7 +91,7 @@ export default function ProfilePage() {
   return (
     <div className="p-8 max-w-3xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-ink mb-2">Mis Datos</h1>
+        <h1 className="text-3xl font-bold text-ink mb-2">Mis datos</h1>
         <p className="text-slate-500">Configurá tus datos personales y mantené tu currículum actualizado.</p>
       </div>
 
@@ -213,7 +210,7 @@ export default function ProfilePage() {
                 className="mt-1"
               />
               <label htmlFor="terminos" className="text-xs text-slate-600 leading-tight cursor-pointer">
-                Declaro que la información contenida en el CV es verdadera y acepto los términos y condiciones para el envío de mis datos a los colegios seleccionados mediante la plataforma.
+                Declaro que la información contenida en el CV es verdadera y acepto los términos y condiciones para el envío de Mis datos a los colegios seleccionados mediante la plataforma.
               </label>
             </div>
           </div>

@@ -10,35 +10,35 @@ export default function DashboardLayout({
   const [email, setEmail] = useState<string | null>(null);
   const [picture, setPicture] = useState<string | null>(null);
   const [plan, setPlan] = useState<string>("pro"); // default to prevent flicker if pro
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get("token");
-    const userEmail = params.get("email");
-    const userPicture = params.get("picture");
+    const rawUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const apiUrl = rawUrl.endsWith('/') ? rawUrl.slice(0, -1) : rawUrl;
     
-    if (token && userEmail) {
-      localStorage.setItem("token", token);
-      localStorage.setItem("email", userEmail);
-      if (userPicture) localStorage.setItem("picture", decodeURIComponent(userPicture));
-      // Limpiar la URL para que no quede el token expuesto
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-    
-    const adminEmail = "tavika.app@gmail.com";
-    if (localStorage.getItem("email") === adminEmail && window.location.pathname === "/dashboard") {
-      window.location.href = "/admin";
-      return;
-    }
-
-    setEmail(localStorage.getItem("email"));
-    setPicture(localStorage.getItem("picture"));
-    setPlan(localStorage.getItem("plan") || "freemium");
-    setMounted(true);
+    fetch(`${apiUrl}/auth/me`, { credentials: "include" })
+      .then(res => {
+        if (!res.ok) throw new Error("No auth");
+        return res.json();
+      })
+      .then(data => {
+        if (data.is_admin && window.location.pathname === "/dashboard") {
+          window.location.href = "/admin";
+          return;
+        }
+        setEmail(data.email);
+        setPicture(data.picture || null);
+        setPlan(data.plan || "freemium");
+        setIsAdmin(data.is_admin || false);
+        setMounted(true);
+      })
+      .catch(() => {
+        window.location.href = "/";
+      });
   }, []);
 
   const handleLogout = () => {
@@ -70,13 +70,13 @@ export default function DashboardLayout({
             <i className="fa-solid fa-house w-5 text-center"></i> Inicio
           </a>
           <a href="/dashboard/search" className={`sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-colors ${pathname.startsWith('/dashboard/search') ? 'bg-emerald/12 text-emerald font-semibold active' : 'text-slate-400 hover:bg-emerald/10 hover:text-emerald'}`}>
-            <i className="fa-solid fa-magnifying-glass w-5 text-center"></i> Buscar Colegios
+            <i className="fa-solid fa-magnifying-glass w-5 text-center"></i> Buscar colegios
           </a>
           <a href="/dashboard/campaigns" className={`sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-colors ${pathname.startsWith('/dashboard/campaigns') ? 'bg-emerald/12 text-emerald font-semibold active' : 'text-slate-400 hover:bg-emerald/10 hover:text-emerald'}`}>
-            <i className="fa-solid fa-paper-plane w-5 text-center"></i> Mis Campañas
+            <i className="fa-solid fa-paper-plane w-5 text-center"></i> Mis campañas
           </a>
           <a href="/dashboard/profile" className={`sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-colors ${pathname.startsWith('/dashboard/profile') ? 'bg-emerald/12 text-emerald font-semibold active' : 'text-slate-400 hover:bg-emerald/10 hover:text-emerald'}`}>
-            <i className="fa-solid fa-address-card w-5 text-center"></i> Mis Datos
+            <i className="fa-solid fa-address-card w-5 text-center"></i> Mis datos
           </a>
           {mounted && plan !== "pro" && (
             <div className="mt-auto px-4 pb-6">
@@ -87,9 +87,9 @@ export default function DashboardLayout({
                     const apiUrl = rawUrl.endsWith('/') ? rawUrl.slice(0, -1) : rawUrl;
                     const res = await fetch(`${apiUrl}/api/payments/create_preference`, { 
                       method: 'POST',
+                      credentials: 'include',
                       headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        'Content-Type': 'application/json'
                       }
                     });
                     const data = await res.json();
@@ -106,7 +106,7 @@ export default function DashboardLayout({
                 }}
                 className="w-full bg-emerald text-white rounded-xl py-3 font-semibold hover:bg-emeralddeep transition-colors"
               >
-                <i className="fa-solid fa-bolt w-5 text-center"></i> Comprar Pase
+                <i className="fa-solid fa-bolt w-5 text-center"></i> Comprar pase
               </button>
             </div>
           )}
@@ -123,15 +123,15 @@ export default function DashboardLayout({
             </button>
             <div>
               <h1 className="text-lg font-bold text-ink">Bienvenido 👋</h1>
-              <p className="text-xs text-slate-400 hidden sm:block">Dashboard Principal</p>
+              <p className="text-xs text-slate-400 hidden sm:block">Dashboard principal</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
             {email ? (
-              <div className="flex items-center gap-4 relative">
-                {email === "tavika.app@gmail.com" && (
+              <div className="hidden lg:flex items-center gap-6">
+                {isAdmin && (
                   <a href="/admin" className="bg-purple-100 text-purple-700 hover:bg-purple-200 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors">
-                    <i className="fa-solid fa-lock"></i> Panel Admin
+                    <i className="fa-solid fa-lock"></i> Panel admin
                   </a>
                 )}
                 
@@ -150,16 +150,16 @@ export default function DashboardLayout({
                     )}
                     <div className="flex flex-col items-start">
                       <span className="text-sm font-bold text-ink leading-tight">{email.split("@")[0]}</span>
-                      <span className="text-xs text-slate-400 leading-tight">Ver Perfil <i className="fa-solid fa-chevron-down ml-1 text-[10px]"></i></span>
+                      <span className="text-xs text-slate-400 leading-tight">Ver perfil <i className="fa-solid fa-chevron-down ml-1 text-[10px]"></i></span>
                     </div>
                   </button>
 
                   {/* Dropdown Menu */}
                   {menuOpen && (
                     <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-lg border border-line py-2 z-50 animate-fade-in">
-                      <div className="px-4 py-2 border-b border-line mb-2">
-                        <p className="text-sm font-bold text-ink truncate">{email}</p>
-                        <p className="text-xs text-slate-500">{email === "tavika.app@gmail.com" ? "Master Admin" : `Plan ${plan === "pro" ? "Pro" : "Freemium"}`}</p>
+                      <div className="px-4 py-2">
+                        <p className="text-sm font-semibold text-ink">{email?.split('@')[0] || "Usuario"}</p>
+                        <p className="text-xs text-slate-500">{isAdmin ? "Master Admin" : `Plan ${plan === "pro" ? "Pro" : "Freemium"}`}</p>
                       </div>
                       <a href="#" className="block px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-emerald transition-colors">
                         <i className="fa-solid fa-gear w-5 text-center mr-1"></i> Configuración
@@ -168,7 +168,7 @@ export default function DashboardLayout({
                         onClick={handleLogout}
                         className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors"
                       >
-                        <i className="fa-solid fa-arrow-right-from-bracket w-5 text-center mr-1"></i> Cerrar Sesión
+                        <i className="fa-solid fa-arrow-right-from-bracket w-5 text-center mr-1"></i> Cerrar sesión
                       </button>
                     </div>
                   )}
@@ -185,7 +185,7 @@ export default function DashboardLayout({
               <div className="bg-emerald/10 border border-emerald/20 rounded-xl px-2 md:px-4 py-2 text-sm hidden sm:block">
                 <span className="text-emerald font-bold"><i className="fa-solid fa-crown mr-1"></i> PRO</span>
               </div>
-            ) : mounted && email !== "tavika.app@gmail.com" ? (
+            ) : mounted && !isAdmin ? (
               <div className="bg-navy/5 border border-navy/15 rounded-xl px-2 md:px-4 py-2 text-sm hidden sm:block">
                 <span className="text-slate-500 hidden md:inline">Plan:</span>
                 <span className="font-semibold text-ink ml-1">Freemium</span>

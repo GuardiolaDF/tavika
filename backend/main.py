@@ -1,8 +1,6 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from starlette.middleware.sessions import SessionMiddleware
-from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 import os
+from fastapi import FastAPI
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 from api import auth, dashboard, admin, payments, campaigns
 from core.audit import AuditLogMiddleware
 from database.database import engine, Base
@@ -47,22 +45,31 @@ def startup_event():
     thread = threading.Thread(target=process_pending_emails, daemon=True)
     thread.start()
 
+env_name = os.getenv("APP_ENV", "development")
+
 # OAuth requiere session middleware
-# Usamos same_site="lax" y https_only=True porque Google hace un redirect de vuelta (cross-site GET)
-# y los navegadores estrictos (como Brave) bloquean third-party cookies si usamos "none".
+# Usamos same_site="lax" y https_only=True en producción porque Google hace un redirect de vuelta
 app.add_middleware(
     SessionMiddleware, 
     secret_key=os.getenv("SECRET_KEY", "super-secret-key"),
     same_site="lax",
-    https_only=True
+    https_only=env_name == "production"
 )
 
-# Configuración básica de CORS para que el frontend pueda conectarse
+# Configuración dinámica de CORS según el entorno para cumplir el estándar de cookies seguras
+
+if env_name == "development":
+    origins = ["http://localhost:3000"]
+else:
+    # Staging y Producción toman los orígenes de la variable de entorno
+    frontend_urls = os.getenv("FRONTEND_URL", "https://tavika.up.railway.app")
+    origins = [url.strip().rstrip("/") for url in frontend_urls.split(",") if url.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # En producción se debe restringir a los dominios del frontend
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
 )
 

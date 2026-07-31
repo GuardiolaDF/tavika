@@ -153,7 +153,7 @@ export default function Home() {
               <div className="group p-8 rounded-2xl border border-line hover:border-emerald/40 transition-all duration-300 hover:-translate-y-1">
                 <div className="flex items-center space-x-3 mb-3">
                   <i className="fa-solid fa-filter text-purple-600 text-xl"></i>
-                  <h3 className="text-xl font-bold text-ink">Filtros por Distrito y Nivel</h3>
+                  <h3 className="text-xl font-bold text-ink">Filtros por distrito y nivel</h3>
                 </div>
                 <p className="text-slate-600">Seleccioná exactamente dónde querés trabajar: primaria, secundaria o terciario, por barrio o localidad.</p>
               </div>
@@ -250,7 +250,7 @@ export default function Home() {
                   }}
                   className="block w-full py-4 bg-emerald text-white font-semibold rounded-xl text-center hover:bg-emeralddeep transition-all"
                 >
-                  Comprar Pase
+                  Comprar pase
                 </button>
               </div>
             </div>

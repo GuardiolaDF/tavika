@@ -39,9 +39,7 @@ export default function NewCampaign() {
     const email = localStorage.getItem("email");
     if (email) {
       const token = localStorage.getItem('token');
-      fetch(`${apiUrl}/api/campaigns/profile`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
+      fetch(`${apiUrl}/api/campaigns/profile`, { credentials: "include" })
         .then(res => res.json())
         .then(data => {
           setPerfil({
@@ -69,7 +67,7 @@ export default function NewCampaign() {
   
   const fetchOptions = async (endpoint: string, params: string = "") => {
     try {
-      const res = await fetch(`${apiUrl}/api/admin/${endpoint}${params}`);
+      const res = await fetch(`${apiUrl}/api/admin/${endpoint}${params}`, { credentials: "include" });
       if (res.ok) return await res.json();
     } catch(e) {}
     return [];
@@ -101,7 +99,7 @@ export default function NewCampaign() {
     if (filters.nivel) query += `&nivel=${encodeURIComponent(filters.nivel)}`;
     
     try {
-      const res = await fetch(`${apiUrl}/api/admin/colegios${query}`);
+      const res = await fetch(`${apiUrl}/api/admin/colegios${query}`, { credentials: "include" });
       if (res.ok) {
         const data = await res.json();
         setColegios(data.colegios || []);
@@ -141,7 +139,7 @@ export default function NewCampaign() {
       
       const res = await fetch(`${apiUrl}/api/campaigns/profile`, {
         method: "POST",
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        credentials: "include",
         body: formData,
       });
       
@@ -192,9 +190,9 @@ export default function NewCampaign() {
     try {
       const res = await fetch(`${apiUrl}/api/campaigns/create`, {
         method: "POST",
+        credentials: "include",
         headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem('token')}`
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           asunto: template.asunto,

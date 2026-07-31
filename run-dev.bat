@@ -4,4 +4,5 @@ echo INICIANDO ENTORNO: DEVELOPMENT
 echo ==========================================
 set APP_ENV=development
 cd backend
-uvicorn main:app --reload
+
+python -m uvicorn main:app --reload

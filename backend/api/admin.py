@@ -31,7 +31,7 @@ def get_stats(db: Session = Depends(get_db), admin: Usuario = Depends(get_admin_
     }
 
 @router.get("/colegios")
-def list_colegios(skip: int = 0, limit: int = 100, estado: str = None, provincia: str = None, ciudad: str = None, distrito: str = None, nivel: str = None, q: str = None, admin_view: bool = False, db: Session = Depends(get_db)):
+def list_colegios(skip: int = 0, limit: int = 100, estado: str = None, provincia: str = None, ciudad: str = None, distrito: str = None, nivel: str = None, q: str = None, admin_view: bool = False, db: Session = Depends(get_db), admin: Usuario = Depends(get_admin_user_jwt)):
     """ Endpoint para ver el estado de la base de datos de colegios """
     query = db.query(Colegio)
     if not admin_view:
@@ -65,12 +65,12 @@ def list_colegios(skip: int = 0, limit: int = 100, estado: str = None, provincia
     }
 
 @router.get("/provincias")
-def get_provincias(db: Session = Depends(get_db)):
+def get_provincias(db: Session = Depends(get_db), admin: Usuario = Depends(get_admin_user_jwt)):
     provincias = db.query(Colegio.provincia).filter(Colegio.provincia.isnot(None)).distinct().order_by(Colegio.provincia).all()
     return [p[0] for p in provincias if p[0]]
 
 @router.get("/ciudades")
-def get_ciudades(provincia: str = None, db: Session = Depends(get_db)):
+def get_ciudades(provincia: str = None, db: Session = Depends(get_db), admin: Usuario = Depends(get_admin_user_jwt)):
     query = db.query(Colegio.ciudad).filter(Colegio.ciudad.isnot(None))
     if provincia:
         query = query.filter(Colegio.provincia == provincia)
@@ -78,7 +78,7 @@ def get_ciudades(provincia: str = None, db: Session = Depends(get_db)):
     return [c[0] for c in ciudades if c[0]]
 
 @router.get("/distritos")
-def get_distritos(provincia: str = None, ciudad: str = None, db: Session = Depends(get_db)):
+def get_distritos(provincia: str = None, ciudad: str = None, db: Session = Depends(get_db), admin: Usuario = Depends(get_admin_user_jwt)):
     query = db.query(Colegio.distrito).filter(Colegio.distrito.isnot(None))
     if provincia:
         query = query.filter(Colegio.provincia == provincia)
@@ -88,7 +88,7 @@ def get_distritos(provincia: str = None, ciudad: str = None, db: Session = Depen
     return [d[0] for d in distritos if d[0]]
 
 @router.get("/niveles")
-def get_niveles(db: Session = Depends(get_db)):
+def get_niveles(db: Session = Depends(get_db), admin: Usuario = Depends(get_admin_user_jwt)):
     niveles = db.query(Colegio.nivel).filter(Colegio.nivel.isnot(None)).distinct().order_by(Colegio.nivel).all()
     return [n[0] for n in niveles if n[0]]
 

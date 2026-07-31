@@ -31,53 +31,48 @@ export default function AdminPanel() {
     usuarios_totales: 0, usuarios_pro: 0, campanas_totales: 0, emails_enviados: 0
   });
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const rawUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const apiUrl = rawUrl.endsWith('/') ? rawUrl.slice(0, -1) : rawUrl;
 
   const fetchOptions = async (endpoint: string, params: string = "") => {
     try {
-      const res = await fetch(`${apiUrl}/api/admin/${endpoint}${params}`);
+      const res = await fetch(`${apiUrl}/api/admin/${endpoint}${params}`, { credentials: "include" });
       if (res.ok) return await res.json();
     } catch(e) {}
     return [];
   };
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const urlToken = params.get("token");
-    const urlEmail = params.get("email");
-    const urlPicture = params.get("picture");
-    
-    if (urlToken && urlEmail) {
-      localStorage.setItem("token", urlToken);
-      localStorage.setItem("email", urlEmail);
-      if (urlPicture) localStorage.setItem("picture", decodeURIComponent(urlPicture));
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-
-    const localToken = localStorage.getItem("token");
-    const localEmail = localStorage.getItem("email");
-    
-    if (localEmail !== "tavika.app@gmail.com") {
-      alert("Acceso denegado. Serás redirigido al inicio.");
-      router.push("/dashboard");
-      return;
-    }
-    setToken(localToken);
-    setEmail(localEmail);
-    setPicture(localStorage.getItem("picture"));
+    fetch(`${apiUrl}/auth/me`, { credentials: "include" })
+      .then(res => {
+        if (!res.ok) throw new Error("No auth");
+        return res.json();
+      })
+      .then(data => {
+        if (!data.is_admin) {
+          alert("Acceso denegado. Serás redirigido al inicio.");
+          router.push("/dashboard");
+          return;
+        }
+        setEmail(data.email);
+        setPicture(data.picture || null);
+        setToken("cookie"); // Simulamos el token para desbloquear la UI
+      })
+      .catch(() => {
+        router.push("/");
+      });
   }, []);
 
   const handleLogout = () => {
-    localStorage.clear();
     window.location.href = "/";
   };
 
   useEffect(() => {
     if (token) {
-      fetchDbStats(token);
-      fetchColegios(token, filters, 0, true);
-      fetchTemplate(token);
-      fetchSystemStats(token);
+      fetchDbStats();
+      fetchColegios(filters, 0, true);
+      fetchTemplate();
+      fetchSystemStats();
       fetchOptions("provincias").then(setProvinciasOpt);
       fetchOptions("niveles").then(setNivelesOpt);
     }
@@ -99,19 +94,18 @@ export default function AdminPanel() {
     }
   }, [filters.ciudad]);
 
-  const getHeaders = (t: string) => ({
-    "Authorization": `Bearer ${t}`,
+  const getHeaders = () => ({
     "Content-Type": "application/json"
   });
 
-  const fetchDbStats = async (t: string) => {
+  const fetchDbStats = async () => {
     try {
-      const res = await fetch(`${apiUrl}/api/admin/stats`, { headers: getHeaders(t) });
+      const res = await fetch(`${apiUrl}/api/admin/stats`, { headers: getHeaders(), credentials: "include" });
       if (res.ok) setDbStats(await res.json());
     } catch (e) {}
   };
 
-  const fetchColegios = async (t: string, currentFilters: any, currentSkip: number, reset: boolean = false) => {
+  const fetchColegios = async (currentFilters: any, currentSkip: number, reset: boolean = false) => {
     try {
       setLoading(true);
       let query = `?limit=50&skip=${currentSkip}&admin_view=true`;
@@ -122,7 +116,7 @@ export default function AdminPanel() {
       if (currentFilters.distrito) query += `&distrito=${encodeURIComponent(currentFilters.distrito)}`;
       if (currentFilters.nivel) query += `&nivel=${encodeURIComponent(currentFilters.nivel)}`;
       
-      const res = await fetch(`${apiUrl}/api/admin/colegios${query}`, { headers: getHeaders(t) });
+      const res = await fetch(`${apiUrl}/api/admin/colegios${query}`, { headers: getHeaders(), credentials: "include" });
       if (res.ok) {
         const data = await res.json();
         if (reset) {
@@ -141,19 +135,19 @@ export default function AdminPanel() {
   const loadMore = () => {
     const newSkip = skip + 50;
     setSkip(newSkip);
-    if (token) fetchColegios(token, filters, newSkip, false);
+    if (token) fetchColegios(filters, newSkip, false);
   };
 
-  const fetchTemplate = async (t: string) => {
+  const fetchTemplate = async () => {
     try {
-      const res = await fetch(`${apiUrl}/api/admin/template`, { headers: getHeaders(t) });
+      const res = await fetch(`${apiUrl}/api/admin/template`, { headers: getHeaders(), credentials: "include" });
       if (res.ok) setTemplate(await res.json());
     } catch (e) {}
   };
 
-  const fetchSystemStats = async (t: string) => {
+  const fetchSystemStats = async () => {
     try {
-      const res = await fetch(`${apiUrl}/api/admin/system_stats`, { headers: getHeaders(t) });
+      const res = await fetch(`${apiUrl}/api/admin/system_stats`, { headers: getHeaders(), credentials: "include" });
       if (res.ok) setSysStats(await res.json());
     } catch (e) {}
   };
@@ -164,7 +158,7 @@ export default function AdminPanel() {
     if (e.target.name === "ciudad") { newFilters.distrito = ""; }
     setFilters(newFilters);
     setSkip(0);
-    if (token) fetchColegios(token, newFilters, 0, true);
+    if (token) fetchColegios(newFilters, 0, true);
   };
 
   const handleSaveTemplate = async () => {
@@ -173,7 +167,8 @@ export default function AdminPanel() {
     try {
       const res = await fetch(`${apiUrl}/api/admin/template`, {
         method: "POST",
-        headers: getHeaders(token),
+        headers: getHeaders(),
+        credentials: "include",
         body: JSON.stringify(template)
       });
       if (res.ok) alert("Plantilla guardada con éxito!");
@@ -203,8 +198,8 @@ export default function AdminPanel() {
         <header className="mb-8 border-b border-line pb-6">
           <div className="flex justify-between items-start">
             <div>
-              <h1 className="text-3xl font-bold text-ink">Centro de Comando ⚡</h1>
-              <p className="text-slate-500">Solo visible para Master Admin (tavika.app@gmail.com)</p>
+              <h1 className="text-2xl font-bold">Admin Panel</h1>
+              <p className="text-slate-500">Solo visible para Master Admin ({email || "Admin"})</p>
             </div>
             
             {/* User Dropdown */}
@@ -243,7 +238,7 @@ export default function AdminPanel() {
                     onClick={handleLogout}
                     className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors"
                   >
-                    <i className="fa-solid fa-arrow-right-from-bracket w-5 text-center mr-1"></i> Cerrar Sesión
+                    <i className="fa-solid fa-arrow-right-from-bracket w-5 text-center mr-1"></i> Cerrar sesión
                   </button>
                 </div>
               )}

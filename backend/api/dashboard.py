@@ -2,16 +2,12 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from database.database import get_db
 from database.models import Usuario, Colegio, Campana, Postulacion
+from core.security import get_current_user_jwt
 
 router = APIRouter()
 
-# TODO: Add authentication dependency to get current_user
-# def get_current_user(...): return Usuario
-
 @router.get("/stats")
-def get_dashboard_stats(db: Session = Depends(get_db)):
-    # Simulación de datos por ahora, hasta que conectemos el current_user real
-    # current_user = Depends(get_current_user)
+def get_dashboard_stats(db: Session = Depends(get_db), user: Usuario = Depends(get_current_user_jwt)):
     
     # Total de colegios privados en la base global
     from database.models import Colegio

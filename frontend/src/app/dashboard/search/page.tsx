@@ -18,7 +18,7 @@ export default function SearchPage() {
 
   const fetchOptions = async (endpoint: string, params: string = "") => {
     try {
-      const res = await fetch(`${apiUrl}/api/admin/${endpoint}${params}`);
+      const res = await fetch(`${apiUrl}/api/admin/${endpoint}${params}`, { credentials: "include" });
       if (res.ok) return await res.json();
     } catch(e) {}
     return [];
@@ -65,9 +65,8 @@ export default function SearchPage() {
       if (currentFilters.distrito) query += `&distrito=${encodeURIComponent(currentFilters.distrito)}`;
       if (currentFilters.nivel) query += `&nivel=${encodeURIComponent(currentFilters.nivel)}`;
       
-      const token = localStorage.getItem("token") || "";
       const res = await fetch(`${apiUrl}/api/admin/colegios${query}`, {
-        headers: { "Authorization": `Bearer ${token}` }
+        credentials: "include"
       });
       
       if (res.ok) {
