@@ -1,5 +1,7 @@
 import os
 from fastapi import FastAPI
+from starlette.middleware.sessions import SessionMiddleware
+from starlette.middleware.cors import CORSMiddleware
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 from api import auth, dashboard, admin, payments, campaigns
 from core.audit import AuditLogMiddleware
