@@ -27,8 +27,8 @@ export default function CampaignsPage() {
           <h1 className="text-3xl font-bold text-ink mb-2">Mis campañas</h1>
           <p className="text-slate-500">Monitoreá el progreso de tus postulaciones en tiempo real.</p>
         </div>
-        <Link href="/dashboard/campaigns/new" className="bg-emerald text-white px-6 py-3 rounded-xl font-bold hover:bg-emeralddeep transition-all shadow-lg shadow-emerald/20 flex items-center">
-          <i className="fa-solid fa-plus mr-2"></i> Nueva Campaña
+        <Link href="/dashboard/campaigns/new" className="bg-emerald text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-emeralddeep transition-colors shadow-sm shadow-emerald/20 flex items-center">
+          <i className="fa-solid fa-plus mr-2"></i> Nueva campaña
         </Link>
       </div>
 
