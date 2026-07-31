@@ -16,4 +16,4 @@ google-auth-oauthlib
 google-api-python-client
 PyJWT==2.8.0
 cryptography==41.0.5
-requests==2.31.0
+requests>=2.33.0
