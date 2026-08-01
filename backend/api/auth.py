@@ -137,6 +137,22 @@ if os.getenv("APP_ENV") in ("development", "staging"):
         )
         return response
 
+@router.post("/logout")
+def logout():
+    response = JSONResponse(content={"message": "Sesión cerrada"})
+    is_production = os.getenv("APP_ENV") == "production"
+    # Borrar la cookie fijando max_age a 0
+    response.set_cookie(
+        key="access_token",
+        value="",
+        httponly=True,
+        secure=is_production,
+        samesite="lax",
+        max_age=0,
+        path="/"
+    )
+    return response
+
 class ExchangeRequest(BaseModel):
     code: str
 

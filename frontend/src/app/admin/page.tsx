@@ -63,7 +63,10 @@ export default function AdminPanel() {
       });
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await fetch("/backend/auth/logout", { method: "POST" });
+    } catch (e) {}
     window.location.href = "/";
   };
 

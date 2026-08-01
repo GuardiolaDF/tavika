@@ -41,7 +41,10 @@ export default function DashboardLayout({
       });
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await fetch("/backend/auth/logout", { method: "POST" });
+    } catch (e) {}
     localStorage.clear();
     window.location.href = "/";
   };
