@@ -10,7 +10,7 @@ export default function Dashboard() {
   });
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/dashboard/stats`, { credentials: "include" })
+    fetch(`/backend/api/dashboard/stats`, { credentials: "include" })
       .then(res => res.json())
       .then(data => setStats(data))
       .catch(() => {});
@@ -96,3 +96,4 @@ export default function Dashboard() {
     </>
   );
 }
+

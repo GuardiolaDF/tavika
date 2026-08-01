@@ -17,7 +17,7 @@ export default function DashboardLayout({
   const pathname = usePathname();
 
   useEffect(() => {
-    const rawUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const rawUrl = '/backend';
     const apiUrl = rawUrl.endsWith('/') ? rawUrl.slice(0, -1) : rawUrl;
     
     fetch(`${apiUrl}/auth/me`, { credentials: "include" })
@@ -83,7 +83,7 @@ export default function DashboardLayout({
               <button 
                 onClick={async () => {
                   try {
-                    const rawUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                    const rawUrl = '/backend';
                     const apiUrl = rawUrl.endsWith('/') ? rawUrl.slice(0, -1) : rawUrl;
                     const res = await fetch(`${apiUrl}/api/payments/create_preference`, { 
                       method: 'POST',
@@ -202,3 +202,4 @@ export default function DashboardLayout({
     </div>
   );
 }
+

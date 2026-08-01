@@ -5,7 +5,7 @@ import Link from "next/link";
 export default function CampaignsPage() {
   const [campaigns, setCampaigns] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const apiUrl = '/backend';
 
   useEffect(() => {
     const email = localStorage.getItem("email");
@@ -110,3 +110,4 @@ export default function CampaignsPage() {
     </div>
   );
 }
+

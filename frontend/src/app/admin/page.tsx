@@ -31,7 +31,7 @@ export default function AdminPanel() {
     usuarios_totales: 0, usuarios_pro: 0, campanas_totales: 0, emails_enviados: 0
   });
 
-  const rawUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const rawUrl = '/backend';
   const apiUrl = rawUrl.endsWith('/') ? rawUrl.slice(0, -1) : rawUrl;
 
   const fetchOptions = async (endpoint: string, params: string = "") => {
@@ -490,3 +490,4 @@ export default function AdminPanel() {
     </div>
   );
 }
+

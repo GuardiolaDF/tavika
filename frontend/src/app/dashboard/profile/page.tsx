@@ -14,7 +14,7 @@ export default function ProfilePage() {
   const [terminos, setTerminos] = useState(false);
   const [saving, setSaving] = useState(false);
   const [fetching, setFetching] = useState(true);
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const apiUrl = '/backend';
 
   useEffect(() => {
     const email = localStorage.getItem("email");
@@ -230,3 +230,4 @@ export default function ProfilePage() {
     </div>
   );
 }
+

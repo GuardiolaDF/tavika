@@ -11,6 +11,16 @@ const cspHeader = `
 `.replace(/\s{2,}/g, ' ').trim();
 
 const nextConfig: NextConfig = {
+  async rewrites() {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const baseUrl = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
+    return [
+      {
+        source: '/backend/:path*',
+        destination: `${baseUrl}/:path*`,
+      },
+    ];
+  },
   async headers() {
     return [
       {

@@ -14,7 +14,7 @@ export default function SearchPage() {
   const [distritosOpt, setDistritosOpt] = useState<string[]>([]);
   const [nivelesOpt, setNivelesOpt] = useState<string[]>([]);
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const apiUrl = '/backend';
 
   const fetchOptions = async (endpoint: string, params: string = "") => {
     try {
@@ -216,3 +216,4 @@ export default function SearchPage() {
     </>
   );
 }
+

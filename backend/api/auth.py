@@ -69,26 +69,13 @@ async def auth_callback(request: Request, db: Session = Depends(get_db)):
         # Crear JWT propio de Távika
         jwt_token = create_access_token({"sub": user.email, "is_admin": user.is_admin})
         
-        # Redirigir al frontend
+        # Crear Exchange Token (válido 30s)
+        from datetime import timedelta
+        exchange_token = create_access_token({"exchange_jwt": jwt_token, "is_admin": user.is_admin}, expires_delta=timedelta(seconds=30))
+        
         frontend_url = os.getenv("FRONTEND_URL", "https://tavika.up.railway.app").rstrip("/")
         
-        if user.is_admin:
-            response = RedirectResponse(url=f"{frontend_url}/admin")
-        else:
-            response = RedirectResponse(url=f"{frontend_url}/dashboard")
-            
-        is_production = os.getenv("APP_ENV") == "production"
-        samesite_policy = "none" if is_production else "lax"
-        
-        response.set_cookie(
-            key="access_token",
-            value=f"Bearer {jwt_token}",
-            httponly=True,
-            secure=is_production,
-            samesite=samesite_policy,
-            max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-            path="/"
-        )
+        response = RedirectResponse(url=f"{frontend_url}/auth/sync?code={exchange_token}")
         return response
         
     except Exception as e:
@@ -149,3 +136,36 @@ if os.getenv("APP_ENV") in ("development", "staging"):
             path="/"
         )
         return response
+
+class ExchangeRequest(BaseModel):
+    code: str
+
+@router.post("/exchange")
+def exchange_token(req: ExchangeRequest):
+    try:
+        from jose import jwt, JWTError
+        from core.security import SECRET_KEY, ALGORITHM
+        payload = jwt.decode(req.code, SECRET_KEY, algorithms=[ALGORITHM])
+        real_jwt = payload.get("exchange_jwt")
+        if not real_jwt:
+            raise HTTPException(status_code=400, detail="Invalid token type")
+            
+        response = JSONResponse(content={"message": "Exchange exitoso", "is_admin": payload.get("is_admin")})
+        
+        is_production = os.getenv("APP_ENV") == "production"
+        # Usamos Lax porque ahora Next.js funciona como First-Party Proxy
+        samesite_policy = "lax" 
+        
+        response.set_cookie(
+            key="access_token",
+            value=f"Bearer {real_jwt}",
+            httponly=True,
+            secure=is_production,
+            samesite=samesite_policy,
+            max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+            path="/"
+        )
+        return response
+    except Exception as e:
+        raise HTTPException(status_code=401, detail="Expired or invalid exchange token")
+

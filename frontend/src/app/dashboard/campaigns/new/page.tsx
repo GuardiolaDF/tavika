@@ -32,7 +32,7 @@ export default function NewCampaign() {
   const [enviosRestantes, setEnviosRestantes] = useState(10);
   const [plan, setPlan] = useState("freemium");
   
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const apiUrl = '/backend';
 
   useEffect(() => {
     // Load initial data
@@ -449,3 +449,4 @@ export default function NewCampaign() {
     </div>
   );
 }
+
