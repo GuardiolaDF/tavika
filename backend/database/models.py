@@ -72,3 +72,14 @@ class Configuracion(Base):
     
     clave = Column(String, primary_key=True, index=True)
     valor = Column(String)
+
+class Pago(Base):
+    __tablename__ = "pagos"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    payment_id = Column(String, unique=True, index=True)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"))
+    estado = Column(String, index=True) # approved, refunded, charged_back, rejected
+    fecha_creacion = Column(DateTime, default=datetime.datetime.utcnow)
+    
+    usuario = relationship("Usuario")
