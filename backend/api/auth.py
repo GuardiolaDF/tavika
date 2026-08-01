@@ -78,13 +78,14 @@ async def auth_callback(request: Request, db: Session = Depends(get_db)):
             response = RedirectResponse(url=f"{frontend_url}/dashboard")
             
         is_production = os.getenv("APP_ENV") == "production"
+        samesite_policy = "none" if is_production else "lax"
         
         response.set_cookie(
             key="access_token",
             value=f"Bearer {jwt_token}",
             httponly=True,
             secure=is_production,
-            samesite="lax",
+            samesite=samesite_policy,
             max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
             path="/"
         )
@@ -108,3 +109,43 @@ def get_me(user: Usuario = Depends(get_current_user_jwt)):
         "is_admin": user.is_admin,
         "plan": user.plan
     }
+
+from pydantic import BaseModel
+from fastapi.responses import JSONResponse
+
+class DevLoginRequest(BaseModel):
+    email: str
+
+if os.getenv("APP_ENV") in ("development", "staging"):
+    @router.post("/dev-login")
+    def dev_login(req: DevLoginRequest, db: Session = Depends(get_db)):
+        """
+        ATENCIÓN: Endpoint exclusivo para auditorías de seguridad y pentesting.
+        Permite generar una cookie de sesión idéntica a la de Google OAuth para cualquier usuario existente.
+        Este endpoint nunca se registra ni está disponible en el entorno de producción.
+        """
+        user = db.query(Usuario).filter(Usuario.email == req.email).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+            
+        jwt_token = create_access_token({"sub": user.email, "is_admin": user.is_admin})
+        
+        response = JSONResponse(content={
+            "message": "Dev login exitoso", 
+            "email": user.email, 
+            "is_admin": user.is_admin
+        })
+        
+        is_production = os.getenv("APP_ENV") == "production"
+        samesite_policy = "none" if is_production else "lax"
+        
+        response.set_cookie(
+            key="access_token",
+            value=f"Bearer {jwt_token}",
+            httponly=True,
+            secure=is_production,
+            samesite=samesite_policy,
+            max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+            path="/"
+        )
+        return response
