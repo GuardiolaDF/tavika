@@ -18,8 +18,8 @@ def get_stats(db: Session = Depends(get_db), admin: Usuario = Depends(get_admin_
     # Filtrar SIEMPRE por sector privado
     base_query = db.query(Colegio).filter(Colegio.sector.ilike("%privado%"))
     
-    is_missing = or_(Colegio.email.is_(None), Colegio.email.in_(['S/D', '', '-']))
-    has_mail = and_(Colegio.email.isnot(None), ~Colegio.email.in_(['S/D', '', '-']))
+    is_missing = or_(Colegio.email.is_(None), ~Colegio.email.like('%@%'))
+    has_mail = and_(Colegio.email.isnot(None), Colegio.email.like('%@%'))
     
     total = base_query.count()
     con_mail = base_query.filter(has_mail).count()
@@ -46,8 +46,8 @@ def list_colegios(skip: int = 0, limit: int = 100, estado: str = None, provincia
         query = query.filter(Colegio.nombre.ilike(f"%{q}%"))
         
     if estado:
-        is_missing = or_(Colegio.email.is_(None), Colegio.email.in_(['S/D', '', '-']))
-        has_mail = and_(Colegio.email.isnot(None), ~Colegio.email.in_(['S/D', '', '-']))
+        is_missing = or_(Colegio.email.is_(None), ~Colegio.email.like('%@%'))
+        has_mail = and_(Colegio.email.isnot(None), Colegio.email.like('%@%'))
         
         if estado == "con_mail":
             query = query.filter(has_mail)

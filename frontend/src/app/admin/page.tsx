@@ -345,11 +345,11 @@ export default function AdminPanel() {
                         <td className="p-4 text-slate-500">{col.nivel}</td>
                         <td className="p-4 text-slate-500">{col.email || "Sin email"}</td>
                         <td className="p-4 min-w-[120px]">
-                          {col.estado === "verificado" || (col.estado === "sano" && col.email && col.email !== "S/D" && col.email !== "-") ? (
+                          {col.estado === "verificado" || (col.estado === "sano" && col.email && col.email.includes("@")) ? (
                             <span className="bg-emerald/10 text-emerald px-2.5 py-1 rounded-full text-xs font-bold tracking-wide">VERIFICADO</span>
                           ) : col.estado === "rebotado" ? (
                             <span className="bg-red-500/10 text-red-500 px-2.5 py-1 rounded-full text-xs font-bold tracking-wide">REBOTADO</span>
-                          ) : col.email && col.email !== "S/D" && col.email !== "-" ? (
+                          ) : col.email && col.email.includes("@") ? (
                             <span className="bg-blue-500/10 text-blue-500 px-2.5 py-1 rounded-full text-xs font-bold tracking-wide">EXISTENTE</span>
                           ) : (
                             <span className="bg-amber/10 text-amber-600 px-2.5 py-1 rounded-full text-xs font-bold tracking-wide">FALTANTE</span>
