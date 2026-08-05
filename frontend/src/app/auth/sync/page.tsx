@@ -1,8 +1,8 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
-export default function AuthSyncPage() {
+function SyncContent() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -35,13 +35,19 @@ export default function AuthSyncPage() {
       });
   }, [searchParams]);
 
+  return null;
+}
+
+export default function AuthSyncPage() {
   return (
     <div className="min-h-screen bg-surface flex items-center justify-center">
       <div className="flex flex-col items-center gap-4">
         <div className="w-12 h-12 rounded-full border-4 border-emerald/30 border-t-emerald animate-spin"></div>
         <p className="text-slate-500 font-medium animate-pulse">Sincronizando sesión segura...</p>
       </div>
+      <Suspense fallback={null}>
+        <SyncContent />
+      </Suspense>
     </div>
   );
 }
-

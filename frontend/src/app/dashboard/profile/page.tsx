@@ -68,7 +68,7 @@ export default function ProfilePage() {
     
     const email = localStorage.getItem("email");
     if (!email) {
-      const profileToSave = { ...perfil };
+      const profileToSave: any = { ...perfil };
       if (cvFile) {
         const reader = new FileReader();
         reader.onload = (event) => {
