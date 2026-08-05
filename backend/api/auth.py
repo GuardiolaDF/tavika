@@ -54,11 +54,21 @@ async def auth_callback(request: Request, db: Session = Depends(get_db)):
             raise HTTPException(status_code=400, detail="Error fetching user info")
             
         user = db.query(Usuario).filter(Usuario.email == user_info.email).first()
+        
+        # Hardcode admins
+        admin_emails = ["guardiola.dario@gmail.com", "tavika.app@gmail.com"]
+        is_admin_email = user_info.email in admin_emails
+        
         if not user:
-            user = Usuario(email=user_info.email, nombre=user_info.get("name", ""))
+            user = Usuario(email=user_info.email, nombre=user_info.get("name", ""), is_admin=is_admin_email)
             db.add(user)
             db.commit()
             db.refresh(user)
+        elif is_admin_email and not user.is_admin:
+            user.is_admin = True
+            db.commit()
+            db.refresh(user)
+            
         if token.get('refresh_token'):
             user.gmail_token = encrypt_data(token.get('refresh_token'))
             db.commit()
