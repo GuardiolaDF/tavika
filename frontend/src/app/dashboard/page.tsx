@@ -11,7 +11,10 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetch(`/backend/api/dashboard/stats`, { credentials: "include" })
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to fetch");
+        return res.json();
+      })
       .then(data => setStats(data))
       .catch(() => {});
   }, []);
@@ -55,7 +58,7 @@ export default function Dashboard() {
               <i className="fa-solid fa-school text-purple-500 text-sm"></i>
             </div>
           </div>
-          <p className="text-3xl font-bold text-ink">{stats.colegios_base.toLocaleString()}</p>
+          <p className="text-3xl font-bold text-ink">{(stats.colegios_base || 0).toLocaleString()}</p>
         </div>
 
         <div className="bg-paper rounded-2xl border border-line p-6 shadow-sm hover:shadow-md transition-shadow">
