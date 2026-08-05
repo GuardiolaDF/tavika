@@ -159,9 +159,11 @@ class ExchangeRequest(BaseModel):
 @router.post("/exchange")
 def exchange_token(req: ExchangeRequest):
     try:
-        from jose import jwt, JWTError
-        from core.security import SECRET_KEY, ALGORITHM
-        payload = jwt.decode(req.code, SECRET_KEY, algorithms=[ALGORITHM])
+        from core.security import decode_access_token
+        payload = decode_access_token(req.code)
+        if not payload:
+            raise HTTPException(status_code=401, detail="Expired or invalid exchange token")
+        
         real_jwt = payload.get("exchange_jwt")
         if not real_jwt:
             raise HTTPException(status_code=400, detail="Invalid token type")
