@@ -56,7 +56,7 @@ async def auth_callback(request: Request, db: Session = Depends(get_db)):
         user = db.query(Usuario).filter(Usuario.email == user_info.email).first()
         
         # Hardcode admins
-        admin_emails = ["guardiola.dario@gmail.com", "tavika.app@gmail.com"]
+        admin_emails = ["tavika.app@gmail.com"]
         is_admin_email = user_info.email in admin_emails
         
         if not user:
@@ -66,6 +66,11 @@ async def auth_callback(request: Request, db: Session = Depends(get_db)):
             db.refresh(user)
         elif is_admin_email and not user.is_admin:
             user.is_admin = True
+            db.commit()
+            db.refresh(user)
+        elif not is_admin_email and user.is_admin and user.email == "guardiola.dario@gmail.com":
+            # Demote guardiola if he was already granted admin
+            user.is_admin = False
             db.commit()
             db.refresh(user)
             
