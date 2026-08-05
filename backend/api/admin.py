@@ -11,15 +11,20 @@ import json
 router = APIRouter()
 security = HTTPBearer()
 
+from sqlalchemy import or_, and_
+
 @router.get("/stats")
 def get_stats(db: Session = Depends(get_db), admin: Usuario = Depends(get_admin_user_jwt)):
     # Filtrar SIEMPRE por sector privado
     base_query = db.query(Colegio).filter(Colegio.sector.ilike("%privado%"))
     
+    is_missing = or_(Colegio.email.is_(None), Colegio.email.in_(['S/D', '', '-']))
+    has_mail = and_(Colegio.email.isnot(None), ~Colegio.email.in_(['S/D', '', '-']))
+    
     total = base_query.count()
-    con_mail = base_query.filter(Colegio.email.isnot(None)).count()
-    sin_mail = base_query.filter(Colegio.email.is_(None)).count()
-    verificados = base_query.filter(Colegio.email.isnot(None), Colegio.estado == "sano").count()
+    con_mail = base_query.filter(has_mail).count()
+    sin_mail = base_query.filter(is_missing).count()
+    verificados = base_query.filter(has_mail, Colegio.estado == "sano").count()
     rebotados = base_query.filter(Colegio.estado == "rebotado").count()
     
     return {
@@ -41,10 +46,13 @@ def list_colegios(skip: int = 0, limit: int = 100, estado: str = None, provincia
         query = query.filter(Colegio.nombre.ilike(f"%{q}%"))
         
     if estado:
+        is_missing = or_(Colegio.email.is_(None), Colegio.email.in_(['S/D', '', '-']))
+        has_mail = and_(Colegio.email.isnot(None), ~Colegio.email.in_(['S/D', '', '-']))
+        
         if estado == "con_mail":
-            query = query.filter(Colegio.email.isnot(None))
+            query = query.filter(has_mail)
         elif estado == "sin_mail":
-            query = query.filter(Colegio.email.is_(None))
+            query = query.filter(is_missing)
         else:
             query = query.filter(Colegio.estado == estado)
     if provincia:

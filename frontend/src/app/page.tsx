@@ -62,7 +62,7 @@ export default function Home() {
                   Consigue horas docentes sin el estrés de buscar correos
                 </h1>
                 <p className="text-xl text-slate-300 max-w-lg leading-relaxed">
-                  Conectamos tu Gmail con más de 3.000 colegios verificados. Postúlate de forma masiva, inteligente y segura en minutos.
+                  Conectamos tu Gmail con más de 12.000 colegios verificados. Postúlate de forma masiva, inteligente y segura en minutos.
                 </p>
                 <div className="flex flex-wrap gap-4">
                   <Link href="#pricing" className="bg-emerald hover:bg-emeralddeep text-white text-lg font-semibold px-8 py-4 rounded-xl transition-all duration-300 shadow-xl shadow-emerald/20 flex items-center group">
@@ -141,7 +141,7 @@ export default function Home() {
                   <i className="fa-solid fa-shield-heart text-emerald text-xl"></i>
                   <h3 className="text-xl font-bold text-ink">Base de datos curada</h3>
                 </div>
-                <p className="text-slate-600">Más de 3.000 direcciones verificadas de colegios de Buenos Aires, Córdoba y Mendoza. Actualizada semanalmente.</p>
+                <p className="text-slate-600">Más de 12.000 direcciones verificadas de colegios de Buenos Aires, Córdoba y Mendoza. Actualizada semanalmente.</p>
               </div>
               <div className="group p-8 rounded-2xl border border-line hover:border-emerald/40 transition-all duration-300 hover:-translate-y-1">
                 <div className="flex items-center space-x-3 mb-3">
