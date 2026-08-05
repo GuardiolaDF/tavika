@@ -17,6 +17,7 @@ function SyncContent() {
       headers: {
         "Content-Type": "application/json"
       },
+      credentials: "include",
       body: JSON.stringify({ code })
     })
       .then(res => {

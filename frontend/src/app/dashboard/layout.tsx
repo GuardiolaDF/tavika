@@ -44,7 +44,7 @@ export default function DashboardLayout({
 
   const handleLogout = async () => {
     try {
-      await fetch("/backend/auth/logout", { method: "POST" });
+      await fetch("/backend/auth/logout", { method: "POST", credentials: "include" });
     } catch (e) {}
     localStorage.clear();
     window.location.href = "/";

@@ -128,7 +128,7 @@ if os.getenv("APP_ENV") in ("development", "staging"):
         
         response.set_cookie(
             key="access_token",
-            value=f"Bearer {jwt_token}",
+            value=jwt_token,
             httponly=True,
             secure=is_production,
             samesite=samesite_policy,
@@ -174,7 +174,7 @@ def exchange_token(req: ExchangeRequest):
         
         response.set_cookie(
             key="access_token",
-            value=f"Bearer {real_jwt}",
+            value=real_jwt,
             httponly=True,
             secure=is_production,
             samesite=samesite_policy,

@@ -62,8 +62,8 @@ def get_current_user_jwt(request: Request, db: Session = Depends(get_db)):
     token = None
     if auth_header and auth_header.startswith("Bearer "):
         token = auth_header.replace("Bearer ", "")
-    elif cookie_token and cookie_token.startswith("Bearer "):
-        token = cookie_token.replace("Bearer ", "")
+    elif cookie_token:
+        token = cookie_token.replace("Bearer ", "") if cookie_token.startswith("Bearer ") else cookie_token
         
     if not token:
         raise HTTPException(status_code=401, detail="No autenticado")
@@ -84,8 +84,8 @@ def get_optional_user_jwt(request: Request, db: Session = Depends(get_db)):
     token = None
     if auth_header and auth_header.startswith("Bearer "):
         token = auth_header.replace("Bearer ", "")
-    elif cookie_token and cookie_token.startswith("Bearer "):
-        token = cookie_token.replace("Bearer ", "")
+    elif cookie_token:
+        token = cookie_token.replace("Bearer ", "") if cookie_token.startswith("Bearer ") else cookie_token
         
     if not token:
         return None

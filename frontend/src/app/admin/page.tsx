@@ -65,7 +65,7 @@ export default function AdminPanel() {
 
   const handleLogout = async () => {
     try {
-      await fetch("/backend/auth/logout", { method: "POST" });
+      await fetch("/backend/auth/logout", { method: "POST", credentials: "include" });
     } catch (e) {}
     window.location.href = "/";
   };
