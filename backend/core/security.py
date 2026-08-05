@@ -77,6 +77,25 @@ def get_current_user_jwt(request: Request, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     return user
 
+def get_optional_user_jwt(request: Request, db: Session = Depends(get_db)):
+    auth_header = request.headers.get("Authorization")
+    cookie_token = request.cookies.get("access_token")
+    
+    token = None
+    if auth_header and auth_header.startswith("Bearer "):
+        token = auth_header.replace("Bearer ", "")
+    elif cookie_token and cookie_token.startswith("Bearer "):
+        token = cookie_token.replace("Bearer ", "")
+        
+    if not token:
+        return None
+        
+    payload = decode_access_token(token)
+    if not payload:
+        return None
+    email = payload.get("sub")
+    return db.query(Usuario).filter(Usuario.email == email).first()
+
 def get_admin_user_jwt(current_user: Usuario = Depends(get_current_user_jwt)):
     if not current_user.is_admin:
         raise HTTPException(status_code=403, detail="No tienes permisos de administrador")

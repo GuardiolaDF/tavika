@@ -37,7 +37,8 @@ export default function DashboardLayout({
         setMounted(true);
       })
       .catch(() => {
-        window.location.href = "/";
+        setEmail(null);
+        setMounted(true);
       });
   }, []);
 

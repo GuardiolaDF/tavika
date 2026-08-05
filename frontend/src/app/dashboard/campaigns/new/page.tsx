@@ -32,11 +32,30 @@ export default function NewCampaign() {
   const [enviosRestantes, setEnviosRestantes] = useState(10);
   const [plan, setPlan] = useState("freemium");
   
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  
   const apiUrl = '/backend';
 
   useEffect(() => {
     // Load initial data
     const email = localStorage.getItem("email");
+    
+    const localProfileStr = localStorage.getItem("tavika_profile");
+    if (localProfileStr) {
+      try {
+        const p = JSON.parse(localProfileStr);
+        setPerfil({
+          area_estudios: p.area_estudios || "",
+          dni: p.dni || "",
+          telefono: p.telefono || "",
+          cv_filename: p.cv_filename || ""
+        });
+        if (p.asunto && p.cuerpo) {
+          setTemplate({ asunto: p.asunto, cuerpo: p.cuerpo });
+        }
+      } catch(e) {}
+    }
+
     if (email) {
       const token = localStorage.getItem('token');
       fetch(`${apiUrl}/api/campaigns/profile`, { credentials: "include" })
@@ -186,6 +205,13 @@ export default function NewCampaign() {
       alert("Debes seleccionar al menos un colegio.");
       return;
     }
+    
+    const email = localStorage.getItem("email");
+    if (!email) {
+      setShowAuthModal(true);
+      return;
+    }
+    
     setLoading(true);
     try {
       const res = await fetch(`${apiUrl}/api/campaigns/create`, {
@@ -217,6 +243,44 @@ export default function NewCampaign() {
 
   return (
     <div className="p-8 max-w-5xl mx-auto">
+      {/* AUTH MODAL */}
+      {showAuthModal && (
+        <div className="fixed inset-0 bg-ink/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl relative animate-fade-in">
+            <button 
+              onClick={() => setShowAuthModal(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-ink transition-colors"
+            >
+              <i className="fa-solid fa-xmark text-xl"></i>
+            </button>
+            
+            <div className="w-12 h-12 bg-emerald/10 text-emerald rounded-full flex items-center justify-center mb-6 mx-auto">
+              <i className="fa-solid fa-paper-plane text-2xl"></i>
+            </div>
+            
+            <h3 className="text-2xl font-bold text-ink text-center mb-4">
+              ¡Tu campaña está lista!
+            </h3>
+            
+            <p className="text-slate-600 text-center mb-6 text-sm leading-relaxed">
+              Has seleccionado {selectedIds.length} colegios. Para asegurar que tus correos lleguen directamente a la bandeja de entrada (y no a spam), necesitamos que vincules tu cuenta de Gmail. Esto nos permite enviar los correos de forma 100% auténtica desde tu propia dirección.
+            </p>
+            
+            <a 
+              href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/auth/login`}
+              className="flex items-center justify-center gap-3 w-full bg-slate-900 hover:bg-slate-800 text-white rounded-xl py-3 font-semibold transition-colors"
+            >
+              <i className="fa-brands fa-google text-red-400"></i>
+              Iniciar sesión con Google
+            </a>
+            
+            <p className="text-center text-xs text-slate-400 mt-4">
+              No compartiremos tus datos con terceros.
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-ink mb-2">Crear Campaña</h1>
         <p className="text-slate-500">Configurá tu postulación masiva en 4 simples pasos.</p>

@@ -18,6 +18,15 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const email = localStorage.getItem("email");
+    
+    const localProfileStr = localStorage.getItem("tavika_profile");
+    if (localProfileStr) {
+      try {
+        const p = JSON.parse(localProfileStr);
+        setPerfil(p);
+      } catch(e) {}
+    }
+
     if (email) {
       fetch(`${apiUrl}/api/campaigns/profile`, { credentials: "include" })
         .then(res => {
@@ -36,6 +45,8 @@ export default function ProfilePage() {
           setFetching(false);
         })
         .catch(() => setFetching(false));
+    } else {
+      setFetching(false);
     }
   }, []);
 
@@ -54,9 +65,33 @@ export default function ProfilePage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    
+    const email = localStorage.getItem("email");
+    if (!email) {
+      const profileToSave = { ...perfil };
+      if (cvFile) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          profileToSave.cv_b64 = event.target?.result as string;
+          profileToSave.cv_filename = cvFile.name;
+          localStorage.setItem("tavika_profile", JSON.stringify(profileToSave));
+          setPerfil(profileToSave);
+          setCvFile(null);
+          alert("Perfil guardado temporalmente. Se guardará permanentemente cuando inicies sesión.");
+          setSaving(false);
+        };
+        reader.readAsDataURL(cvFile);
+      } else {
+        localStorage.setItem("tavika_profile", JSON.stringify(profileToSave));
+        alert("Perfil guardado temporalmente. Se guardará permanentemente cuando inicies sesión.");
+        setSaving(false);
+      }
+      return;
+    }
+
     try {
       const formData = new FormData();
-      formData.append("email", localStorage.getItem("email") || "");
+      formData.append("email", email);
       formData.append("nombre", perfil.nombre);
       formData.append("area_estudios", perfil.area_estudios);
       formData.append("telefono", perfil.telefono);
