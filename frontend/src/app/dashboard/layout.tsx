@@ -20,7 +20,7 @@ export default function DashboardLayout({
     const rawUrl = '/backend';
     const apiUrl = rawUrl.endsWith('/') ? rawUrl.slice(0, -1) : rawUrl;
     
-    fetch(`${apiUrl}/auth/me`, { credentials: "include" })
+    fetch(`${apiUrl}/auth/me`, { credentials: "include", cache: "no-store" })
       .then(res => {
         if (!res.ok) throw new Error("No auth");
         return res.json();
