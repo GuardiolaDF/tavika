@@ -267,7 +267,7 @@ export default function NewCampaign() {
             </p>
             
             <a 
-              href="/backend/auth/login"
+              href={process.env.NODE_ENV === 'production' ? 'https://tavika-backend-production.up.railway.app/auth/login' : 'http://localhost:8000/auth/login'}
               className="flex items-center justify-center gap-3 w-full bg-slate-900 hover:bg-slate-800 text-white rounded-xl py-3 font-semibold transition-colors"
             >
               <i className="fa-brands fa-google text-red-400"></i>
