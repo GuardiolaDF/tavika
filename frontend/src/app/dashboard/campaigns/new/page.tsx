@@ -267,7 +267,7 @@ export default function NewCampaign() {
             </p>
             
             <a 
-              href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/auth/login`}
+              href="/backend/auth/login"
               className="flex items-center justify-center gap-3 w-full bg-slate-900 hover:bg-slate-800 text-white rounded-xl py-3 font-semibold transition-colors"
             >
               <i className="fa-brands fa-google text-red-400"></i>

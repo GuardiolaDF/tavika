@@ -12,7 +12,7 @@ const cspHeader = `
 
 const nextConfig: NextConfig = {
   async rewrites() {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://tavika-backend-production.up.railway.app' : 'http://localhost:8000');
+    const apiUrl = process.env.NODE_ENV === 'production' ? 'https://tavika-backend-production.up.railway.app' : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000');
     const baseUrl = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
     return [
       {
