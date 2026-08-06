@@ -7,7 +7,14 @@ export default function Home() {
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
-    setToken(localStorage.getItem("token"));
+    const rawUrl = '/backend';
+    const apiUrl = rawUrl.endsWith('/') ? rawUrl.slice(0, -1) : rawUrl;
+    fetch(`${apiUrl}/auth/me`, { credentials: "include" })
+      .then(res => {
+        if (res.ok) setToken("logged-in");
+        else setToken(null);
+      })
+      .catch(() => setToken(null));
   }, []);
   return (
     <>
@@ -232,9 +239,7 @@ export default function Home() {
                       const apiUrl = rawUrl.endsWith('/') ? rawUrl.slice(0, -1) : rawUrl;
                       const res = await fetch(`${apiUrl}/api/payments/create_preference`, { 
                         method: 'POST',
-                        headers: {
-                          'Authorization': `Bearer ${localStorage.getItem('token')}`
-                        }
+                        credentials: 'include'
                       });
                       const data = await res.json();
                       if (data.init_point) {

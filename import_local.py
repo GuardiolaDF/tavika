@@ -7,9 +7,9 @@ import os
 
 # Ajustamos el path para poder importar desde backend
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'backend')))
-from database.models import Colegio, Usuario, FuenteCazador, EstadisticaCaceria, Campana, Postulacion, Configuracion, Pago, Base
+from database.models import Colegio, Base
 
-DATABASE_URL = "postgresql://neondb_owner:npg_Xva2JdEZ5QKF@ep-lively-breeze-aut057ir.c-10.us-east-1.aws.neon.tech/neondb?sslmode=require"
+DATABASE_URL = "sqlite:///backend/tavika.db"
 engine = create_engine(DATABASE_URL)
 Base.metadata.drop_all(bind=engine) # Reseteamos la DB para el nuevo schema
 Base.metadata.create_all(bind=engine)

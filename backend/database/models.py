@@ -38,7 +38,35 @@ class Colegio(Base):
     email = Column(String, nullable=True)
     origen = Column(String) # Origen del dato (abc, web, etc)
     estado = Column(String, default="sano") # sano, rebotado, actualizando
+    editado_manualmente = Column(Boolean, default=False)
     fecha_actualizacion = Column(DateTime, default=datetime.datetime.utcnow)
+    
+    # Nuevos campos de filtrado según padrón original
+    cue = Column(String, index=True, nullable=True)
+    tiene_jardin = Column(Boolean, default=False)
+    tiene_primaria = Column(Boolean, default=False)
+    tiene_secundaria = Column(Boolean, default=False)
+    es_tecnica = Column(Boolean, default=False)
+    es_especial = Column(Boolean, default=False)
+    
+    # Campo dinámico para almacenar TODAS las demás columnas del Excel original
+    datos_extra = Column(String, nullable=True)
+
+class FuenteCazador(Base):
+    __tablename__ = "fuentes_cazador"
+    id = Column(Integer, primary_key=True, index=True)
+    url = Column(String, unique=True, index=True)
+    activa = Column(Boolean, default=True)
+
+class EstadisticaCaceria(Base):
+    __tablename__ = "estadisticas_caceria"
+    id = Column(Integer, primary_key=True, index=True)
+    fecha_inicio = Column(DateTime, default=datetime.datetime.utcnow)
+    fecha_fin = Column(DateTime, nullable=True)
+    estado = Column(String, default="en_progreso") # en_progreso, completado, error
+    rebotados_procesados = Column(Integer, default=0)
+    nuevos_encontrados = Column(Integer, default=0)
+    error_msg = Column(String, nullable=True)
 
 class Campana(Base):
     __tablename__ = "campanas"

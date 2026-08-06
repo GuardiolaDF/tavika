@@ -21,6 +21,12 @@ try:
                 conn.commit()
             except:
                 conn.rollback()
+        for col in ["editado_manualmente BOOLEAN DEFAULT 0", "cue VARCHAR", "tiene_jardin BOOLEAN DEFAULT 0", "tiene_primaria BOOLEAN DEFAULT 0", "tiene_secundaria BOOLEAN DEFAULT 0", "es_tecnica BOOLEAN DEFAULT 0", "es_especial BOOLEAN DEFAULT 0"]:
+            try:
+                conn.execute(text(f"ALTER TABLE colegios ADD COLUMN {col}"))
+                conn.commit()
+            except:
+                conn.rollback()
         for col in ["cv_filename VARCHAR", "area_estudios VARCHAR", "dni VARCHAR", "telefono VARCHAR", "asunto_template VARCHAR", "cuerpo_template VARCHAR"]:
             try:
                 conn.execute(text(f"ALTER TABLE usuarios ADD COLUMN {col}"))

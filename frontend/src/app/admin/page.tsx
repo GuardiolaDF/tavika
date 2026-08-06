@@ -31,6 +31,14 @@ export default function AdminPanel() {
     usuarios_totales: 0, usuarios_pro: 0, campanas_totales: 0, emails_enviados: 0
   });
 
+  const [fuentes, setFuentes] = useState<any[]>([]);
+  const [newFuente, setNewFuente] = useState("");
+  const [huntStats, setHuntStats] = useState<any[]>([]);
+  const [hunting, setHunting] = useState(false);
+  const [extraColumns, setExtraColumns] = useState<string[]>([]);
+  const [visibleExtraColumns, setVisibleExtraColumns] = useState<string[]>([]);
+  const [showColumnDropdown, setShowColumnDropdown] = useState(false);
+  
   const rawUrl = '/backend';
   const apiUrl = rawUrl.endsWith('/') ? rawUrl.slice(0, -1) : rawUrl;
 
@@ -78,8 +86,24 @@ export default function AdminPanel() {
       fetchSystemStats();
       fetchOptions("provincias").then(setProvinciasOpt);
       fetchOptions("niveles").then(setNivelesOpt);
+      fetchFuentes();
+      fetchHuntStats();
     }
   }, [token]);
+
+  const fetchFuentes = async () => {
+    try {
+      const res = await fetch(`${apiUrl}/api/admin/fuentes`, { headers: getHeaders(), credentials: "include" });
+      if (res.ok) setFuentes(await res.json());
+    } catch(e) {}
+  };
+
+  const fetchHuntStats = async () => {
+    try {
+      const res = await fetch(`${apiUrl}/api/admin/hunt/stats`, { headers: getHeaders(), credentials: "include" });
+      if (res.ok) setHuntStats(await res.json());
+    } catch(e) {}
+  };
 
   useEffect(() => {
     if (filters.provincia) {
@@ -128,6 +152,23 @@ export default function AdminPanel() {
           setColegios(prev => [...prev, ...(data.colegios || [])]);
         }
         setHasMore(data.colegios && data.colegios.length === 50);
+        
+        // Parse extra columns
+        if (data.colegios) {
+          const allExtras = new Set<string>();
+          data.colegios.forEach((c: any) => {
+            if (c.datos_extra) {
+              try {
+                const parsed = JSON.parse(c.datos_extra);
+                c.parsed_extra = parsed;
+                Object.keys(parsed).forEach(k => allExtras.add(k));
+              } catch(e) {}
+            }
+          });
+          const extrasArr = Array.from(allExtras);
+          setExtraColumns(extrasArr);
+        }
+
       }
     } catch (e) {
     } finally {
@@ -139,6 +180,14 @@ export default function AdminPanel() {
     const newSkip = skip + 50;
     setSkip(newSkip);
     if (token) fetchColegios(filters, newSkip, false);
+  };
+
+  const toggleExtraColumn = (col: string) => {
+    if (visibleExtraColumns.includes(col)) {
+      setVisibleExtraColumns(visibleExtraColumns.filter(c => c !== col));
+    } else {
+      setVisibleExtraColumns([...visibleExtraColumns, col]);
+    }
   };
 
   const fetchTemplate = async () => {
@@ -181,6 +230,74 @@ export default function AdminPanel() {
     } finally {
       setSavingTemplate(false);
     }
+  };
+
+  const handleEditEmail = async (col: any) => {
+    const newEmail = prompt(`Editar email para ${col.nombre}:`, col.email || "");
+    if (newEmail !== null && newEmail !== col.email) {
+      try {
+        const res = await fetch(`${apiUrl}/api/admin/colegios/${col.id}`, {
+          method: "PUT",
+          headers: getHeaders(),
+          credentials: "include",
+          body: JSON.stringify({ email: newEmail.trim() })
+        });
+        if (res.ok) {
+          fetchColegios(filters, 0, true);
+        } else {
+          alert("Error al actualizar email");
+        }
+      } catch(e) { alert("Error de red"); }
+    }
+  };
+
+  const handleAddFuente = async () => {
+    if (!newFuente.trim()) return;
+    try {
+      const res = await fetch(`${apiUrl}/api/admin/fuentes`, {
+        method: "POST",
+        headers: getHeaders(),
+        credentials: "include",
+        body: JSON.stringify({ url: newFuente.trim() })
+      });
+      if (res.ok) {
+        setNewFuente("");
+        fetchFuentes();
+      } else {
+        alert("Error al agregar fuente");
+      }
+    } catch(e) {}
+  };
+
+  const handleDeleteFuente = async (id: number) => {
+    if (!confirm("¿Eliminar fuente?")) return;
+    try {
+      const res = await fetch(`${apiUrl}/api/admin/fuentes/${id}`, {
+        method: "DELETE",
+        headers: getHeaders(),
+        credentials: "include"
+      });
+      if (res.ok) fetchFuentes();
+    } catch(e) {}
+  };
+
+  const handleStartHunt = async () => {
+    if (!confirm("¿Iniciar Cazador Web para buscar correos faltantes/rebotados? Esto correrá en segundo plano.")) return;
+    setHunting(true);
+    try {
+      const res = await fetch(`${apiUrl}/api/admin/hunt/start`, {
+        method: "POST",
+        headers: getHeaders(),
+        credentials: "include"
+      });
+      if (res.ok) {
+        alert("Cazador Web iniciado en segundo plano.");
+        fetchHuntStats();
+      } else {
+        alert("Error al iniciar cazador");
+      }
+    } catch(e) {}
+    setHunting(false);
   };
 
   if (!token) return <div className="p-10 text-center">Verificando seguridad...</div>;
@@ -255,6 +372,9 @@ export default function AdminPanel() {
             <button onClick={() => setActiveTab("template")} className={`px-5 py-2.5 rounded-xl font-medium transition-colors ${activeTab === "template" ? "bg-emerald text-white" : "bg-paper border border-line hover:bg-slate-50"}`}>
               <i className="fa-solid fa-envelope-open-text mr-2"></i> Plantilla Global
             </button>
+            <button onClick={() => setActiveTab("cazador")} className={`px-5 py-2.5 rounded-xl font-medium transition-colors ${activeTab === "cazador" ? "bg-emerald text-white" : "bg-paper border border-line hover:bg-slate-50"}`}>
+              <i className="fa-solid fa-spider mr-2"></i> Cazador Web
+            </button>
             <button onClick={() => setActiveTab("stats")} className={`px-5 py-2.5 rounded-xl font-medium transition-colors ${activeTab === "stats" ? "bg-emerald text-white" : "bg-paper border border-line hover:bg-slate-50"}`}>
               <i className="fa-solid fa-chart-line mr-2"></i> Estadísticas
             </button>
@@ -324,9 +444,26 @@ export default function AdminPanel() {
                   {nivelesOpt.map(n => <option key={n} value={n}>{n}</option>)}
                 </select>
               </div>
+              <div className="flex justify-end pt-2 relative">
+                  <button onClick={() => setShowColumnDropdown(!showColumnDropdown)} className="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm hover:bg-ink whitespace-nowrap">
+                    <i className="fa-solid fa-table-columns mr-2"></i> Columnas Extra ({visibleExtraColumns.length})
+                  </button>
+                  {showColumnDropdown && (
+                    <div className="absolute right-0 top-12 bg-white border border-line rounded-xl shadow-xl z-50 p-4 max-h-[400px] overflow-y-auto w-64 text-left">
+                      <h4 className="font-bold text-ink mb-2 text-sm border-b pb-2">Mostrar Columnas</h4>
+                      {extraColumns.map(col => (
+                        <label key={col} className="flex items-center gap-2 py-1.5 hover:bg-slate-50 px-2 rounded cursor-pointer">
+                          <input type="checkbox" checked={visibleExtraColumns.includes(col)} onChange={() => toggleExtraColumn(col)} className="text-emerald focus:ring-emerald rounded border-slate-300" />
+                          <span className="text-sm text-slate-700 truncate" title={col}>{col}</span>
+                        </label>
+                      ))}
+                      {extraColumns.length === 0 && <p className="text-xs text-slate-500">No hay datos extra cargados.</p>}
+                    </div>
+                  )}
+              </div>
             </div>
             
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto relative">
                 <table className="w-full text-left text-sm whitespace-nowrap">
                   <thead>
                     <tr className="text-slate-400 bg-paper border-b border-line">
@@ -335,16 +472,38 @@ export default function AdminPanel() {
                       <th className="p-4 font-medium">Nivel</th>
                       <th className="p-4 font-medium">Email</th>
                       <th className="p-4 font-medium min-w-[120px]">Estado</th>
+                      {visibleExtraColumns.map(col => (
+                        <th key={col} className="p-4 font-medium text-ink">{col}</th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-line">
                     {colegios.map((col: any) => (
                       <tr key={col.id} className="hover:bg-slate-50">
-                        <td className="p-4 font-medium text-ink max-w-[200px] truncate" title={col.nombre}>{col.nombre}</td>
+                        <td className="p-4 font-medium text-ink min-w-[200px]" title={col.nombre}>
+                          {col.nombre}
+                          <div className="flex gap-1 mt-1 flex-wrap">
+                            {col.tiene_jardin && <span className="text-[9px] bg-pink-100 text-pink-600 px-1 rounded border border-pink-200">JARDIN</span>}
+                            {col.tiene_primaria && <span className="text-[9px] bg-orange-100 text-orange-600 px-1 rounded border border-orange-200">PRIMARIA</span>}
+                            {col.tiene_secundaria && <span className="text-[9px] bg-blue-100 text-blue-600 px-1 rounded border border-blue-200">SECUNDARIA</span>}
+                            {col.es_tecnica && <span className="text-[9px] bg-indigo-100 text-indigo-600 px-1 rounded border border-indigo-200">TECNICA</span>}
+                            {col.es_especial && <span className="text-[9px] bg-purple-100 text-purple-600 px-1 rounded border border-purple-200">ESPECIAL</span>}
+                          </div>
+                        </td>
                         <td className="p-4 text-slate-500">{col.provincia}{col.ciudad ? ` - ${col.ciudad}` : ''}{col.distrito ? ` - ${col.distrito}` : ''}</td>
-                        <td className="p-4 text-slate-500">{col.nivel}</td>
-                        <td className="p-4 text-slate-500">{col.email || "Sin email"}</td>
-                        <td className="p-4 min-w-[120px]">
+                        <td className="p-4 text-slate-500">
+                          <div>{col.nivel}</div>
+                          {col.cue && <div className="text-xs text-slate-400 mt-1">CUE: {col.cue}</div>}
+                        </td>
+                        <td className="p-4 text-slate-500">
+                          <div className="flex items-center gap-2">
+                            <span>{col.email || "Sin email"}</span>
+                            <button onClick={() => handleEditEmail(col)} className="text-emerald hover:text-emeralddeep" title="Editar Email">
+                              <i className="fa-solid fa-pen-to-square text-xs"></i>
+                            </button>
+                          </div>
+                        </td>
+                        <td className="p-4 min-w-[120px] flex flex-col items-start gap-1">
                           {col.estado === "verificado" || (col.estado === "sano" && col.email && col.email.includes("@")) ? (
                             <span className="bg-emerald/10 text-emerald px-2.5 py-1 rounded-full text-xs font-bold tracking-wide">VERIFICADO</span>
                           ) : col.estado === "rebotado" ? (
@@ -354,7 +513,15 @@ export default function AdminPanel() {
                           ) : (
                             <span className="bg-amber/10 text-amber-600 px-2.5 py-1 rounded-full text-xs font-bold tracking-wide">FALTANTE</span>
                           )}
+                          {col.editado_manualmente && (
+                            <span className="bg-purple-100 text-purple-600 border border-purple-200 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide">MANUAL</span>
+                          )}
                         </td>
+                        {visibleExtraColumns.map(extraCol => (
+                          <td key={extraCol} className="p-4 text-slate-500 text-xs whitespace-nowrap">
+                            {col.parsed_extra?.[extraCol] || "-"}
+                          </td>
+                        ))}
                       </tr>
                     ))}
                   </tbody>
@@ -430,6 +597,101 @@ export default function AdminPanel() {
                     {v}
                   </button>
                 ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "cazador" && (
+          <div className="animate-fade-in space-y-6">
+            <div className="flex justify-between items-center bg-paper p-6 rounded-2xl border border-line">
+              <div>
+                <h2 className="text-xl font-bold text-ink mb-1"><i className="fa-solid fa-spider mr-2 text-emerald"></i> Cazador Web</h2>
+                <p className="text-sm text-slate-500">Busca automáticamente correos de colegios faltantes o rebotados en internet.</p>
+              </div>
+              <button 
+                onClick={handleStartHunt}
+                disabled={hunting}
+                className="bg-emerald text-white px-6 py-3 rounded-xl font-bold hover:bg-emeralddeep transition-all shadow-lg shadow-emerald/20 disabled:opacity-50"
+              >
+                {hunting ? <><i className="fa-solid fa-spinner fa-spin mr-2"></i>Iniciando...</> : <><i className="fa-solid fa-play mr-2"></i>Iniciar Cacería Ahora</>}
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="bg-paper p-6 rounded-2xl border border-line">
+                <h3 className="font-bold text-ink mb-4">Directorios de Confianza (Fuentes)</h3>
+                <p className="text-sm text-slate-500 mb-4">El bot buscará primero en estas páginas web. Agrega las URLs sin https://</p>
+                <div className="flex gap-2 mb-4">
+                  <input 
+                    type="text" 
+                    value={newFuente}
+                    onChange={(e) => setNewFuente(e.target.value)}
+                    placeholder="ej: paginasamarillas.com.ar" 
+                    className="flex-1 border border-line rounded-lg px-4 py-2 focus:outline-none focus:border-emerald"
+                  />
+                  <button onClick={handleAddFuente} className="bg-slate-800 text-white px-4 py-2 rounded-lg hover:bg-ink">Agregar</button>
+                </div>
+                <div className="max-h-60 overflow-y-auto border border-line rounded-xl">
+                  <table className="w-full text-sm text-left">
+                    <thead className="bg-slate-50 sticky top-0">
+                      <tr>
+                        <th className="p-3 font-medium text-slate-500">URL</th>
+                        <th className="p-3 font-medium text-slate-500 text-right">Acción</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-line">
+                      {fuentes.map(f => (
+                        <tr key={f.id}>
+                          <td className="p-3 font-medium text-ink">{f.url}</td>
+                          <td className="p-3 text-right">
+                            <button onClick={() => handleDeleteFuente(f.id)} className="text-red-500 hover:text-red-700">
+                              <i className="fa-solid fa-trash"></i>
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                      {fuentes.length === 0 && (
+                        <tr><td colSpan={2} className="p-4 text-center text-slate-500">No hay fuentes configuradas.</td></tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div className="bg-paper p-6 rounded-2xl border border-line">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-bold text-ink">Historial de Cacerías</h3>
+                  <button onClick={fetchHuntStats} className="text-slate-400 hover:text-emerald"><i className="fa-solid fa-rotate-right"></i></button>
+                </div>
+                <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                  {huntStats.map((stat, i) => (
+                    <div key={i} className="border border-line rounded-xl p-4 bg-slate-50 flex flex-col gap-2 relative">
+                      <div className="flex justify-between items-start">
+                        <div className="text-xs text-slate-400 font-mono">
+                          {new Date(stat.fecha_inicio).toLocaleString()}
+                        </div>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${stat.estado === 'completado' ? 'bg-emerald/10 text-emerald' : stat.estado === 'error' ? 'bg-red-500/10 text-red-500' : 'bg-blue-500/10 text-blue-500'}`}>
+                          {stat.estado.toUpperCase()}
+                        </span>
+                      </div>
+                      <div className="flex gap-6 mt-1">
+                        <div>
+                          <p className="text-xs text-slate-500 uppercase font-bold">Procesados</p>
+                          <p className="text-xl font-bold text-ink">{stat.rebotados_procesados}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-slate-500 uppercase font-bold">Nuevos Mails</p>
+                          <p className="text-xl font-bold text-emerald">{stat.nuevos_encontrados}</p>
+                        </div>
+                      </div>
+                      {stat.error_msg && <p className="text-xs text-red-500 mt-2 bg-red-50 p-2 rounded">{stat.error_msg}</p>}
+                    </div>
+                  ))}
+                  {huntStats.length === 0 && (
+                    <div className="text-center p-8 text-slate-500">No hay historial de cacerías.</div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
