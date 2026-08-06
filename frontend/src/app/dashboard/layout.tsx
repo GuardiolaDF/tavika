@@ -179,7 +179,7 @@ export default function DashboardLayout({
                 </div>
               </div>
             ) : (
-              <a href="/backend/auth/login" className="flex items-center gap-2 bg-amber/10 border border-amber/30 text-amber-700 rounded-xl px-4 py-2 text-sm font-medium cursor-pointer hover:bg-amber/15 transition-colors">
+              <a href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/auth/login`} className="flex items-center gap-2 bg-amber/10 border border-amber/30 text-amber-700 rounded-xl px-4 py-2 text-sm font-medium cursor-pointer hover:bg-amber/15 transition-colors">
                 <i className="fa-solid fa-triangle-exclamation"></i>
                 <span>Gmail no vinculado</span>
                 <span className="underline text-xs">Vincular ahora</span>

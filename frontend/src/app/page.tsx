@@ -43,7 +43,7 @@ export default function Home() {
                 Ir a tu Dashboard
               </a>
             ) : (
-              <a href="/backend/auth/login" className="hidden sm:inline-block text-sm font-medium text-white/70 hover:text-white px-3 py-2 transition-colors">
+              <a href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/auth/login`} className="hidden sm:inline-block text-sm font-medium text-white/70 hover:text-white px-3 py-2 transition-colors">
                 Iniciar sesión
               </a>
             )}
