@@ -56,7 +56,7 @@ async def auth_callback(request: Request, db: Session = Depends(get_db)):
         user = db.query(Usuario).filter(Usuario.email == user_info.email).first()
         
         # Hardcode admins
-        admin_emails = ["tavika.app@gmail.com", "guardiola.dario@gmail.com"]
+        admin_emails = ["tavika.app@gmail.com"]
         is_admin_email = user_info.email in admin_emails
         
         # Extraer imagen y encodearla

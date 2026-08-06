@@ -1,22 +1,18 @@
 import pandas as pd
 import numpy as np
+import os
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'backend')))
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-import sys
-import os
-
-# Ajustamos el path para poder importar desde backend
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'backend')))
-from database.models import Colegio, Usuario, FuenteCazador, EstadisticaCaceria, Campana, Postulacion, Configuracion, Pago, Base
+from database.models import Colegio, Base
 
 DATABASE_URL = "postgresql://neondb_owner:npg_Xva2JdEZ5QKF@ep-lively-breeze-aut057ir.c-10.us-east-1.aws.neon.tech/neondb?sslmode=require"
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def import_padron_to_db():
-    print("WARNING: Resetting database...")
-    Base.metadata.drop_all(bind=engine) # Reseteamos la DB para el nuevo schema
-    Base.metadata.create_all(bind=engine)
     print("Leyendo Excel...")
     df = pd.read_excel('padron_oficial_establecimientos_educativos_die.xlsx', skiprows=11)
     df.columns = list(df.iloc[0])
@@ -30,20 +26,25 @@ def import_padron_to_db():
     col_dom = df.columns[9] # Domicilio
     col_tel = df.columns[11] # Teléfono
     
-    # Tratamos de buscar la columna de correo (suele llamarse Mail o Correo Electrónico)
+    # Tratamos de buscar la columna de correo
     col_mail = None
     for c in df.columns:
         if isinstance(c, str) and ('mail' in c.lower() or 'correo' in c.lower()):
             col_mail = c
             break
             
-    print("Filtrando para todo el país (excluyendo vacíos)...")
+    print("Filtrando para todo el país...")
     df = df.replace({np.nan: ""})
-    # Removemos filas que no sean colegios reales (por si hay basura al final del excel)
     nacionales = df[df[col_prov] != ""]
     
-    print(f"Encontrados {len(nacionales)} colegios a nivel nacional. Guardando...")
+    print(f"Encontrados {len(nacionales)} colegios. Guardando...")
     db = SessionLocal()
+    
+    # Optional: check if already exists to avoid duplicates
+    existing_count = db.query(Colegio).count()
+    if existing_count > 0:
+        print(f"La base ya tiene {existing_count} colegios. Abortando para no duplicar.")
+        return
     
     count = 0
     import json
@@ -51,18 +52,13 @@ def import_padron_to_db():
     for _, row in nacionales.iterrows():
         email_val = str(row.get(col_mail, "")).strip() if col_mail else ""
         if email_val == "nan": email_val = ""
-        
         estado = "sano" if email_val and "@" in email_val else "roto"
         
-        # Guardar todos los datos extra en JSON
-        # Evitamos los NaN convirtiendo todo a string
         row_dict = {}
-        # Make column names unique since 'Primario' repeats
         for i, (col_name, val) in enumerate(row.items()):
             safe_name = str(col_name).strip() if pd.notna(col_name) else f"Col_{i}"
             safe_val = str(val).strip() if pd.notna(val) else ""
             if safe_val and safe_val != "nan":
-                # Ensure unique key
                 key = safe_name
                 counter = 1
                 while key in row_dict:
@@ -72,9 +68,6 @@ def import_padron_to_db():
         
         datos_extra_json = json.dumps(row_dict, ensure_ascii=False)
         
-        # Extraemos variables booleanas clave si tienen una 'X'
-        # Viendo los headers, podemos adivinar por indices o nombres.
-        # Las X suelen estar en las columnas de modalidades.
         def has_x(col_name):
             val = str(row.get(col_name, "")).strip().upper()
             return val == "X"
@@ -89,7 +82,6 @@ def import_padron_to_db():
             estado=estado,
             origen="Padron Nacional",
             datos_extra=datos_extra_json,
-            # Mapeo simple
             cue=str(row.get('Cueanexo', '')).strip(),
             tiene_jardin=has_x('Nivel inicial - Jardín de infantes'),
             tiene_primaria=has_x('Primario'),
@@ -102,7 +94,7 @@ def import_padron_to_db():
         
     db.commit()
     db.close()
-    print(f"Exito: Importados {count} colegios a Neon DB.")
+    print(f"Exito: Importados {count} colegios a DB.")
 
 if __name__ == "__main__":
     import_padron_to_db()
