@@ -70,7 +70,7 @@ if env_name == "development":
     origins = ["http://localhost:3000"]
 else:
     # Staging y Producción toman los orígenes de la variable de entorno
-    frontend_urls = os.getenv("FRONTEND_URL", "https://tavika-web-production-4fe2.up.railway.app")
+    frontend_urls = os.getenv("FRONTEND_URL", "https://tavika-web-production.up.railway.app")
     origins = [url.strip().rstrip("/") for url in frontend_urls.split(",") if url.strip()]
 
 app.add_middleware(

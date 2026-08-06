@@ -88,7 +88,7 @@ async def auth_callback(request: Request, db: Session = Depends(get_db)):
         from datetime import timedelta
         exchange_token = create_access_token({"exchange_jwt": jwt_token, "is_admin": user.is_admin}, expires_delta=timedelta(seconds=30))
         
-        frontend_url = os.getenv("FRONTEND_URL", "https://tavika-web-production-4fe2.up.railway.app").rstrip("/")
+        frontend_url = os.getenv("FRONTEND_URL", "https://tavika-web-production.up.railway.app").rstrip("/")
         
         response = RedirectResponse(url=f"{frontend_url}/auth/sync?code={exchange_token}")
         return response
