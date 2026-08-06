@@ -31,7 +31,7 @@ export default function DashboardLayout({
           return;
         }
         setEmail(data.email);
-        setPicture(data.picture || null);
+        setPicture(data.foto_perfil || null);
         setPlan(data.plan || "freemium");
         setIsAdmin(data.is_admin || false);
         setMounted(true);

@@ -14,6 +14,7 @@ class Usuario(Base):
     gmail_token = Column(String, nullable=True) # Guardará el refresh token de OAuth2
     plan = Column(String, default="freemium")
     envios_restantes = Column(Integer, default=10)
+    foto_perfil = Column(String, nullable=True)
     
     cv_filename = Column(String, nullable=True)
     area_estudios = Column(String, nullable=True)

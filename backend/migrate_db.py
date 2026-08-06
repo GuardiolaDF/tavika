@@ -38,6 +38,12 @@ def migrate():
     except Exception as e:
         print(f"Skipped cv_utilizado: {e}")
 
+    try:
+        cursor.execute("ALTER TABLE usuarios ADD COLUMN foto_perfil VARCHAR")
+        print("Added foto_perfil to usuarios")
+    except Exception as e:
+        print(f"Skipped foto_perfil: {e}")
+
     conn.commit()
     conn.close()
     print("Migration complete!")

@@ -56,30 +56,31 @@ async def auth_callback(request: Request, db: Session = Depends(get_db)):
         user = db.query(Usuario).filter(Usuario.email == user_info.email).first()
         
         # Hardcode admins
-        admin_emails = ["tavika.app@gmail.com"]
+        admin_emails = ["tavika.app@gmail.com", "guardiola.dario@gmail.com"]
         is_admin_email = user_info.email in admin_emails
         
+        # Extraer imagen y encodearla
+        picture_url = user_info.get('picture', '')
+
         if not user:
-            user = Usuario(email=user_info.email, nombre=user_info.get("name", ""), is_admin=is_admin_email)
+            user = Usuario(email=user_info.email, nombre=user_info.get("name", ""), is_admin=is_admin_email, foto_perfil=picture_url)
             db.add(user)
             db.commit()
             db.refresh(user)
-        elif is_admin_email and not user.is_admin:
-            user.is_admin = True
-            db.commit()
-            db.refresh(user)
-        elif not is_admin_email and user.is_admin and user.email == "guardiola.dario@gmail.com":
-            # Demote guardiola if he was already granted admin
-            user.is_admin = False
+        else:
+            if is_admin_email and not user.is_admin:
+                user.is_admin = True
+            
+            # Update picture if it changed
+            if picture_url and user.foto_perfil != picture_url:
+                user.foto_perfil = picture_url
+                
             db.commit()
             db.refresh(user)
             
         if token.get('refresh_token'):
             user.gmail_token = encrypt_data(token.get('refresh_token'))
             db.commit()
-        
-        # Extraer imagen y encodearla
-        picture_url = user_info.get('picture', '')
         
         # Crear JWT propio de Távika
         jwt_token = create_access_token({"sub": user.email, "is_admin": user.is_admin})
@@ -109,7 +110,8 @@ def get_me(user: Usuario = Depends(get_current_user_jwt)):
         "email": user.email,
         "nombre": user.nombre,
         "is_admin": user.is_admin,
-        "plan": user.plan
+        "plan": user.plan,
+        "foto_perfil": user.foto_perfil
     }
 
 from pydantic import BaseModel

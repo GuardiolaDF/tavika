@@ -63,7 +63,7 @@ export default function AdminPanel() {
           return;
         }
         setEmail(data.email);
-        setPicture(data.picture || null);
+        setPicture(data.foto_perfil || null);
         setToken("cookie"); // Simulamos el token para desbloquear la UI
       })
       .catch(() => {
