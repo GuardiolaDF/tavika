@@ -69,7 +69,7 @@ export default function Home() {
                   Consigue horas docentes sin el estrés de buscar correos
                 </h1>
                 <p className="text-xl text-slate-300 max-w-lg leading-relaxed">
-                  Conectamos tu Gmail con más de 12.000 colegios verificados. Postúlate de forma masiva, inteligente y segura en minutos.
+                  Enviamos tus postulaciones a más de 12.000 colegios verificados de forma masiva, inteligente y segura en minutos.
                 </p>
                 <div className="flex flex-wrap gap-4">
                   <Link href="#pricing" className="bg-emerald hover:bg-emeralddeep text-white text-lg font-semibold px-8 py-4 rounded-xl transition-all duration-300 shadow-xl shadow-emerald/20 flex items-center group">
@@ -178,8 +178,8 @@ export default function Home() {
               <div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5 bg-line border-t-2 border-dashed border-navy/20"></div>
               <div className="text-center space-y-4">
                 <div className="w-24 h-24 bg-navy text-white rounded-full flex items-center justify-center text-3xl font-bold mx-auto relative z-10">1</div>
-                <h3 className="text-xl font-bold text-ink">Vinculá tu Gmail</h3>
-                <p className="text-slate-600">Conectamos tu cuenta de forma segura vía OAuth. Nunca pedimos tu contraseña.</p>
+                <h3 className="text-xl font-bold text-ink">Registrate</h3>
+                <p className="text-slate-600">Creá tu cuenta de forma gratuita para empezar a enviar postulaciones en pocos minutos.</p>
               </div>
               <div className="text-center space-y-4">
                 <div className="w-24 h-24 bg-navy text-white rounded-full flex items-center justify-center text-3xl font-bold mx-auto relative z-10">2</div>
@@ -211,7 +211,7 @@ export default function Home() {
                 </div>
                 <p className="text-slate-600 mb-8">Para empezar a conocer la herramienta</p>
                 <ul className="space-y-4 mb-8 flex-grow">
-                  <li className="flex items-center text-slate-700"><i className="fa-solid fa-check text-emerald mr-3"></i>Hasta 10 envíos</li>
+                  <li className="flex items-center text-slate-700"><i className="fa-solid fa-check text-emerald mr-3"></i>Hasta 10 créditos de regalo</li>
                   <li className="flex items-center text-slate-700"><i className="fa-solid fa-check text-emerald mr-3"></i>Base de datos completa</li>
                   <li className="flex items-center text-slate-700"><i className="fa-solid fa-check text-emerald mr-3"></i>Filtros básicos</li>
                 </ul>
@@ -221,14 +221,14 @@ export default function Home() {
               </div>
               <div className="p-8 rounded-2xl border-2 border-emerald bg-ink text-white flex flex-col relative overflow-hidden">
                 <div className="absolute top-0 right-0 bg-emerald text-white text-xs font-bold px-4 py-1 rounded-bl-xl">RECOMENDADO</div>
-                <h3 className="text-2xl font-bold">Pase mensual</h3>
+                <h3 className="text-2xl font-bold">Paquete de créditos</h3>
                 <div className="my-6">
                   <span className="text-5xl font-bold">$4.999</span>
-                  <span className="text-slate-400">/mes</span>
+                  <span className="text-slate-400">/1000 u.</span>
                 </div>
-                <p className="text-slate-300 mb-8">Pago único · Sin renovación automática</p>
+                <p className="text-slate-300 mb-8">Comprá saldo a demanda para tus campañas</p>
                 <ul className="space-y-4 mb-8 flex-grow">
-                  <li className="flex items-center"><i className="fa-solid fa-check text-emerald mr-3"></i>Envíos ilimitados</li>
+                  <li className="flex items-center"><i className="fa-solid fa-check text-emerald mr-3"></i>1.000 créditos de envío</li>
                   <li className="flex items-center"><i className="fa-solid fa-check text-emerald mr-3"></i>Todos los filtros avanzados</li>
                   <li className="flex items-center"><i className="fa-solid fa-check text-emerald mr-3"></i>Soporte prioritario</li>
                 </ul>
@@ -255,7 +255,7 @@ export default function Home() {
                   }}
                   className="block w-full py-4 bg-emerald text-white font-semibold rounded-xl text-center hover:bg-emeralddeep transition-all"
                 >
-                  Comprar pase
+                  Comprar paquete
                 </button>
               </div>
             </div>

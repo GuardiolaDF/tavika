@@ -13,12 +13,16 @@ def get_dashboard_stats(db: Session = Depends(get_db), user: Usuario = Depends(g
     from database.models import Colegio
     colegios_totales = db.query(Colegio).filter(Colegio.sector.ilike("%privado%")).count()
         
-    # Fake stats de campañas del usuario
+    # Calcular métricas reales del usuario
+    postulaciones_usuario = db.query(Postulacion).join(Campana).filter(Campana.propietario_id == user.id).all()
+    mails_enviados = len([p for p in postulaciones_usuario if p.estado in ("enviado", "rebotado", "queja", "spam", "error")])
+    mails_exitosos = len([p for p in postulaciones_usuario if p.estado == "enviado"])
+
     stats = {
-        "mails_enviados": 0,
-        "mails_exitosos": 0,
+        "mails_enviados": mails_enviados,
+        "mails_exitosos": mails_exitosos,
         "colegios_base": colegios_totales,
-        "envios_restantes": 10,
+        "creditos_disponibles": user.creditos_disponibles or 0,
         "campanas_recientes": []
     }
     

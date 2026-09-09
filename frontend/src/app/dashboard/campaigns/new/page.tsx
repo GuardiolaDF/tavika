@@ -29,8 +29,7 @@ export default function NewCampaign() {
   const [distritosOpt, setDistritosOpt] = useState<string[]>([]);
   const [nivelesOpt, setNivelesOpt] = useState<string[]>([]);
   
-  const [enviosRestantes, setEnviosRestantes] = useState(10);
-  const [plan, setPlan] = useState("freemium");
+  const [creditosDisponibles, setCreditosDisponibles] = useState(0);
   
   const [showAuthModal, setShowAuthModal] = useState(false);
   
@@ -67,8 +66,7 @@ export default function NewCampaign() {
             telefono: data.telefono || "",
             cv_filename: data.cv_filename || ""
           });
-          setPlan(data.plan);
-          setEnviosRestantes(data.envios_restantes);
+          setCreditosDisponibles(data.creditos_disponibles || 0);
           
           if (data.area_estudios) {
             setTemplate(prev => ({
@@ -181,8 +179,8 @@ export default function NewCampaign() {
     }
     const currentIds = colegios.map(c => c.id);
     const newSelected = Array.from(new Set([...selectedIds, ...currentIds]));
-    if (plan !== "pro" && newSelected.length > enviosRestantes) {
-      alert(`Sólo te quedan ${enviosRestantes} envíos permitidos en tu plan actual.`);
+    if (newSelected.length > creditosDisponibles) {
+      alert(`Saldo insuficiente. Sólo tienes ${creditosDisponibles} créditos disponibles.`);
       return;
     }
     setSelectedIds(newSelected);
@@ -192,8 +190,8 @@ export default function NewCampaign() {
     if (selectedIds.includes(id)) {
       setSelectedIds(selectedIds.filter(i => i !== id));
     } else {
-      if (plan !== "pro" && selectedIds.length >= enviosRestantes) {
-        alert(`Sólo te quedan ${enviosRestantes} envíos permitidos en tu plan actual.`);
+      if (selectedIds.length >= creditosDisponibles) {
+        alert(`Saldo insuficiente. Sólo tienes ${creditosDisponibles} créditos disponibles.`);
         return;
       }
       setSelectedIds([...selectedIds, id]);
@@ -379,7 +377,7 @@ export default function NewCampaign() {
                 <p className="text-slate-500">Filtrá y seleccioná a qué colegios querés enviar tu currículum.</p>
               </div>
               <div className="bg-emerald/10 text-emerald px-4 py-2 rounded-xl font-bold text-sm">
-                Seleccionados: {selectedIds.length} {plan !== "pro" && `/ ${enviosRestantes}`}
+                Seleccionados: {selectedIds.length} / {creditosDisponibles}
               </div>
             </div>
             

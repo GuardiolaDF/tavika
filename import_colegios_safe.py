@@ -92,6 +92,11 @@ def import_padron_to_db():
         db.add(colegio)
         count += 1
         
+        # Commit every 500 records to prevent SSL timeouts
+        if count % 500 == 0:
+            db.commit()
+            print(f"Importados {count} colegios...")
+        
     db.commit()
     db.close()
     print(f"Exito: Importados {count} colegios a DB.")

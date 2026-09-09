@@ -1,6 +1,7 @@
 import hmac
 import hashlib
 from fastapi import APIRouter, Request, HTTPException, Depends
+from pydantic import BaseModel
 import mercadopago
 import os
 from database.database import SessionLocal
@@ -37,20 +38,34 @@ def validate_signature(request: Request, data_id: str):
     
     return sha == v1
 
+class PaymentRequest(BaseModel):
+    pack_id: str
+
+PACKS = {
+    "pack_100": {"title": "Paquete Inicial (100 Créditos)", "price": 5990, "credits": 100},
+    "pack_250": {"title": "Paquete Profesional (250 Créditos)", "price": 9990, "credits": 250},
+    "pack_500": {"title": "Paquete Intensivo (500 Créditos)", "price": 14990, "credits": 500}
+}
+
 @router.post("/create_preference")
-async def create_preference(user: Usuario = Depends(get_current_user_jwt)):
+async def create_preference(req: PaymentRequest, user: Usuario = Depends(get_current_user_jwt)):
     """ Crea el link de pago para la suscripción """
     email = user.email
+    
+    pack = PACKS.get(req.pack_id)
+    if not pack:
+        raise HTTPException(status_code=400, detail="Paquete inválido")
+
     preference_data = {
         "items": [
             {
-                "title": "Suscripción Távika Pro - 1 Mes",
+                "title": pack["title"],
                 "quantity": 1,
-                "unit_price": 4999,
+                "unit_price": pack["price"],
                 "currency_id": "ARS"
             }
         ],
-        "external_reference": email
+        "external_reference": f"{email}|{req.pack_id}"
     }
     
     try:
@@ -110,12 +125,17 @@ async def mp_webhook(request: Request):
                                 pago_db.estado = mp_status
                             
                             # 4. Lógica de Negocio (Manejo de Reembolsos/Aprobaciones)
-                            if mp_status == "approved":
-                                user.plan = "pro"
-                                user.envios_restantes = 1000000
-                            elif mp_status in ("refunded", "charged_back", "rejected", "cancelled"):
-                                user.plan = "freemium"
-                                user.envios_restantes = 10
+                            if mp_status == "approved" and pago_db.estado != "approved":
+                                # external_reference es 'email|pack_id'
+                                external_ref = payment.get("external_reference", "")
+                                parts = external_ref.split("|")
+                                if len(parts) == 2:
+                                    pack_id = parts[1]
+                                    pack = PACKS.get(pack_id)
+                                    if pack:
+                                        user.creditos_disponibles = (user.creditos_disponibles or 0) + pack["credits"]
+                            
+                            pago_db.estado = mp_status
                             
                             db.commit()
                     except Exception as e:

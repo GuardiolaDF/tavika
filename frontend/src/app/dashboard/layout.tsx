@@ -82,7 +82,7 @@ export default function DashboardLayout({
           <a href="/dashboard/profile" className={`sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-colors ${pathname.startsWith('/dashboard/profile') ? 'bg-emerald/12 text-emerald font-semibold active' : 'text-slate-400 hover:bg-emerald/10 hover:text-emerald'}`}>
             <i className="fa-solid fa-address-card w-5 text-center"></i> Mis datos
           </a>
-          {mounted && plan !== "pro" && (
+          {mounted && (
             <div className="mt-auto px-4 pb-6">
               <button 
                 onClick={async () => {
@@ -110,7 +110,7 @@ export default function DashboardLayout({
                 }}
                 className="w-full bg-emerald text-white rounded-xl py-3 font-semibold hover:bg-emeralddeep transition-colors"
               >
-                <i className="fa-solid fa-bolt w-5 text-center"></i> Comprar pase
+                <i className="fa-solid fa-bolt w-5 text-center"></i> Comprar créditos
               </button>
             </div>
           )}
@@ -163,7 +163,7 @@ export default function DashboardLayout({
                     <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-lg border border-line py-2 z-50 animate-fade-in">
                       <div className="px-4 py-2">
                         <p className="text-sm font-semibold text-ink">{email?.split('@')[0] || "Usuario"}</p>
-                        <p className="text-xs text-slate-500">{isAdmin ? "Master Admin" : `Plan ${plan === "pro" ? "Pro" : "Freemium"}`}</p>
+                        <p className="text-xs text-slate-500">{isAdmin ? "Master Admin" : "Usuario"}</p>
                       </div>
                       <a href="#" className="block px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-emerald transition-colors">
                         <i className="fa-solid fa-gear w-5 text-center mr-1"></i> Configuración
@@ -185,16 +185,11 @@ export default function DashboardLayout({
                 <span className="underline text-xs">Vincular ahora</span>
               </a>
             )}
-            {mounted && plan === "pro" ? (
+            {mounted && isAdmin && (
               <div className="bg-emerald/10 border border-emerald/20 rounded-xl px-2 md:px-4 py-2 text-sm hidden sm:block">
-                <span className="text-emerald font-bold"><i className="fa-solid fa-crown mr-1"></i> PRO</span>
+                <span className="text-emerald font-bold"><i className="fa-solid fa-crown mr-1"></i> ADMIN</span>
               </div>
-            ) : mounted && !isAdmin ? (
-              <div className="bg-navy/5 border border-navy/15 rounded-xl px-2 md:px-4 py-2 text-sm hidden sm:block">
-                <span className="text-slate-500 hidden md:inline">Plan:</span>
-                <span className="font-semibold text-ink ml-1">Freemium</span>
-              </div>
-            ) : null}
+            )}
           </div>
         </header>
 

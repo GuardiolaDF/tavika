@@ -6,7 +6,7 @@ export default function Dashboard() {
     mails_enviados: 0,
     mails_exitosos: 0,
     colegios_base: 0,
-    envios_restantes: 10
+    creditos_disponibles: 0
   });
 
   useEffect(() => {
@@ -63,12 +63,12 @@ export default function Dashboard() {
 
         <div className="bg-paper rounded-2xl border border-line p-6 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Envíos Restantes</span>
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Créditos Disponibles</span>
             <div className="w-9 h-9 rounded-xl bg-amber/10 flex items-center justify-center">
               <i className="fa-solid fa-bolt text-amber text-sm"></i>
             </div>
           </div>
-          <p className="text-3xl font-bold text-ink">{stats.envios_restantes}</p>
+          <p className="text-3xl font-bold text-ink">{stats.creditos_disponibles}</p>
         </div>
       </div>
 

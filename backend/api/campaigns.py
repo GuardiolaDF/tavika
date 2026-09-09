@@ -67,8 +67,7 @@ def get_profile(user: Usuario = Depends(get_current_user_jwt)):
         "asunto_template": user.asunto_template or "",
         "cuerpo_template": user.cuerpo_template or "",
         "cv_filename": user.cv_filename,
-        "plan": user.plan,
-        "envios_restantes": user.envios_restantes
+        "creditos_disponibles": user.creditos_disponibles or 0
     }
 
 @router.post("/create")
@@ -81,8 +80,8 @@ def create_campaign(data: CampaignCreate, db: Session = Depends(get_db), user: U
     if not colegios_ids:
         raise HTTPException(status_code=400, detail="Debes seleccionar al menos un colegio")
         
-    if user.plan != "pro" and len(colegios_ids) > user.envios_restantes:
-        raise HTTPException(status_code=400, detail=f"Excedes tus envíos restantes. Puedes enviar hasta {user.envios_restantes} correos.")
+    if (user.creditos_disponibles or 0) < len(colegios_ids):
+        raise HTTPException(status_code=400, detail=f"Saldo insuficiente. Tienes {user.creditos_disponibles or 0} créditos y necesitas {len(colegios_ids)}.")
         
     campana = Campana(
         nombre=nombre,
@@ -96,9 +95,8 @@ def create_campaign(data: CampaignCreate, db: Session = Depends(get_db), user: U
     db.commit()
     db.refresh(campana)
     
-    # Restar los envíos si no es pro
-    if user.plan != "pro":
-        user.envios_restantes -= len(colegios_ids)
+    # Restar los créditos
+    user.creditos_disponibles -= len(colegios_ids)
     
     # Crear las postulaciones pendientes
     for c_id in colegios_ids:

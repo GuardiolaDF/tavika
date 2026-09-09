@@ -12,8 +12,7 @@ class Usuario(Base):
     is_active = Column(Boolean, default=True)
     is_admin = Column(Boolean, default=False)
     gmail_token = Column(String, nullable=True) # Guardará el refresh token de OAuth2
-    plan = Column(String, default="freemium")
-    envios_restantes = Column(Integer, default=10)
+    creditos_disponibles = Column(Integer, default=10)
     foto_perfil = Column(String, nullable=True)
     
     cv_filename = Column(String, nullable=True)
@@ -90,7 +89,8 @@ class Postulacion(Base):
     id = Column(Integer, primary_key=True, index=True)
     campana_id = Column(Integer, ForeignKey("campanas.id"))
     colegio_id = Column(Integer, ForeignKey("colegios.id"))
-    estado = Column(String, default="pendiente") # pendiente, enviado, rebotado
+    estado = Column(String, default="pendiente") # pendiente, enviado, rebotado, spam, queja
+    resend_id = Column(String, nullable=True, index=True)
     fecha_envio = Column(DateTime, nullable=True)
 
     campana = relationship("Campana", back_populates="postulaciones")

@@ -1,7 +1,7 @@
 import sqlite3
 import os
 
-DB_PATH = os.path.join(os.path.dirname(__file__), 'tavika.db')
+DB_PATH = os.path.join(os.path.dirname(__file__), 'sql_app.db')
 
 def migrate():
     print(f"Migrating database at {DB_PATH}")
@@ -43,6 +43,18 @@ def migrate():
         print("Added foto_perfil to usuarios")
     except Exception as e:
         print(f"Skipped foto_perfil: {e}")
+
+    try:
+        cursor.execute("ALTER TABLE usuarios ADD COLUMN creditos_disponibles INTEGER DEFAULT 10")
+        print("Added creditos_disponibles to usuarios")
+    except Exception as e:
+        print(f"Skipped creditos_disponibles: {e}")
+
+    try:
+        cursor.execute("ALTER TABLE postulaciones ADD COLUMN resend_id VARCHAR")
+        print("Added resend_id to postulaciones")
+    except Exception as e:
+        print(f"Skipped resend_id: {e}")
 
     conn.commit()
     conn.close()

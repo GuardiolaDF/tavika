@@ -23,7 +23,7 @@ config_data = {
 starlette_config = Config(environ=config_data)
 
 client_kwargs_config = {
-    'scope': 'openid email profile https://www.googleapis.com/auth/gmail.send'
+    'scope': 'openid email profile'
 }
 
 oauth = OAuth(starlette_config)
@@ -78,10 +78,6 @@ async def auth_callback(request: Request, db: Session = Depends(get_db)):
             db.commit()
             db.refresh(user)
             
-        if token.get('refresh_token'):
-            user.gmail_token = encrypt_data(token.get('refresh_token'))
-            db.commit()
-        
         # Crear JWT propio de Távika
         jwt_token = create_access_token({"sub": user.email, "is_admin": user.is_admin})
         

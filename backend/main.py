@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.middleware.cors import CORSMiddleware
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
-from api import auth, dashboard, admin, payments, campaigns
+from api import auth, dashboard, admin, payments, campaigns, webhooks
 from core.audit import AuditLogMiddleware
 from database.database import engine, Base
 from database import models
@@ -42,16 +42,28 @@ try:
         conn.commit()
 except Exception as e:
     pass
-import threading
-from tasks import process_pending_emails
+from tasks import process_pending_emails_batch
+from fastapi import Header, HTTPException
 
 app = FastAPI(title="Távika API")
 
 @app.on_event("startup")
 def startup_event():
-    # Iniciar la cola de envíos en un hilo nativo separado para no bloquear el Event Loop asíncrono
-    thread = threading.Thread(target=process_pending_emails, daemon=True)
-    thread.start()
+    print("Iniciando Távika en entorno Serverless. Cola delegada a endpoint de workers.")
+
+@app.post("/api/workers/process-queue", tags=["workers"])
+def process_queue_endpoint(authorization: str = Header(None)):
+    """
+    Endpoint secreto para Google Cloud Scheduler.
+    Se ejecuta periódicamente para procesar la cola de correos.
+    """
+    # Verificación de seguridad simple (deberás agregar un token real en el Cron)
+    cron_secret = os.getenv("CRON_SECRET", "tavika-local-cron-secret-123")
+    if not authorization or authorization != f"Bearer {cron_secret}":
+        raise HTTPException(status_code=401, detail="No autorizado para correr workers")
+    
+    procesados = process_pending_emails_batch(limit=50)
+    return {"status": "ok", "procesados": procesados}
 
 env_name = os.getenv("APP_ENV", "development")
 
@@ -67,7 +79,7 @@ app.add_middleware(
 # Configuración dinámica de CORS según el entorno para cumplir el estándar de cookies seguras
 
 if env_name == "development":
-    origins = ["http://localhost:3000"]
+    origins = ["http://localhost:3000", "http://localhost:3001", "http://localhost:3002"]
 else:
     # Staging y Producción toman los orígenes de la variable de entorno
     frontend_urls = os.getenv("FRONTEND_URL", "https://tavika-web-production.up.railway.app")
@@ -93,6 +105,7 @@ app.include_router(dashboard.router, prefix="/api/dashboard", tags=["dashboard"]
 app.include_router(admin.router, prefix="/api/admin", tags=["admin"])
 app.include_router(payments.router, prefix="/api/payments", tags=["payments"])
 app.include_router(campaigns.router, prefix="/api/campaigns", tags=["campaigns"])
+app.include_router(webhooks.router, prefix="/api/webhooks", tags=["webhooks"])
 
 @app.get("/")
 def read_root():
